@@ -8,11 +8,7 @@ changelog:
       labels: [enhancement, feature]
     - title: "🐛 Исправления"
       labels: [bug, fix]
-    - title: "📚 Документация"
-      labels: [documentation]
-    - title: "📦 Зависимости"
-      labels: [dependencies]
-    - title: "🧪 Тесты и автоматизация"
-      labels: [tests, ci]
     - title: "🔧 Другие изменения"
       labels: ["*"]
+      exclude:
+        labels: [documentation, dependencies, tests, ci, chore]

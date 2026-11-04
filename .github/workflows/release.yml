@@ -40,15 +40,6 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: uv run --no-project python scripts/check_release.py
-      - name: Prepare release overview
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        shell: bash
-        run: |
-          uv run --no-project python -m scripts.release_notes \
-            --tag "$RELEASE_TAG" \
-            --repository "$GITHUB_REPOSITORY" \
-            --output "$RUNNER_TEMP/release-notes.md"
       - name: Publish to PyPI using Trusted Publishing
         run: uv publish --trusted-publishing always --check-url https://pypi.org/simple/
       - name: Create GitHub release
@@ -59,8 +50,7 @@ jobs:
         run: |
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             args=(--verify-tag --generate-notes
-              --title "telemt-sdk ${RELEASE_TAG}"
-              --notes-file "$RUNNER_TEMP/release-notes.md")
+              --title "telemt-sdk ${RELEASE_TAG}")
             if [[ "$RELEASE_TAG" =~ (a|b|rc)[0-9]+$ ]]; then
               args+=(--prerelease --latest=false)
             fi
