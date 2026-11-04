@@ -1,0 +1,46 @@
+[general]
+use_middle_proxy = false
+log_level = "silent"
+[general.modes]
+classic = true
+secure = false
+tls = false
+[general.links]
+public_host = "127.0.0.1"
+show = []
+[server]
+port = 10443
+[server.api]
+enabled = true
+listen = "0.0.0.0:9091"
+whitelist = []
+auth_header = "sdk-audit-test-auth"
+minimal_runtime_enabled = true
+runtime_edge_enabled = true
+[[server.listeners]]
+ip = "0.0.0.0"
+port = 18080
+transport = "web"
+proxy_protocol = false
+web_client_ip_source = "x_forwarded_for"
+web_trusted_proxy_cidrs = ["172.16.0.0/12", "127.0.0.1/32", "192.168.0.0/16"]
+[censorship]
+mask = false
+tls_emulation = false
+tls_domain = "example.com"
+[network]
+stun_use = false
+http_ip_detect_urls = []
+[access.users]
+audit_admin = "0123456789abcdef0123456789abcdef"
+[web]
+enabled = true
+[[web.vhosts]]
+host = "proxy.example.com"
+public_addr = "203.0.113.10:443"
+[web.vhosts.decoy]
+mode = "http_upstream"
+upstream = "http://127.0.0.1:18081"
+[[web.vhosts.profiles]]
+user = "audit_admin"
+secret_mode = "dd"

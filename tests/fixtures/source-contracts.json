@@ -1,0 +1,5700 @@
+{
+  "commit": "84e5b827a6619fb2e09ad3d09f253cdffe04bc2f",
+  "models": {
+    "ApiEventRecord": {
+      "source": "src/api/events.rs",
+      "fields": {
+        "seq": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "ts_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "event_type": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "context": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        }
+      }
+    },
+    "ClassCount": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "class": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "ControlOperationStatus": {
+      "source": "src/web/manager/control.rs",
+      "fields": {
+        "operation_id": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "ControlOperationState",
+          "omittable": false
+        },
+        "high_water_session_ref": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        },
+        "requested": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "scanned": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "matched": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "close_signalled": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "conflicted": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "created_epoch_millis": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "updated_epoch_millis": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "failure": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        }
+      }
+    },
+    "CreateUserResponse": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "user": {
+          "type": "UserInfo",
+          "rust_type": "UserInfo",
+          "omittable": false
+        },
+        "secret": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        }
+      }
+    },
+    "DcEndpointWriters": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "endpoint": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "active_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "DcStatus": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "dc": {
+          "type": "int",
+          "rust_type": "i16",
+          "omittable": false
+        },
+        "endpoints": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "endpoint_writers": {
+          "type": "list[DcEndpointWriters]",
+          "rust_type": "Vec<DcEndpointWriters>",
+          "omittable": false
+        },
+        "available_endpoints": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "available_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "required_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "floor_min": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "floor_target": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "floor_max": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "floor_capped": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "alive_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "coverage_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "fresh_alive_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "fresh_coverage_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "rtt_ms": {
+          "type": "float | None",
+          "rust_type": "Option<f64>",
+          "omittable": false
+        },
+        "load": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "DcStatusData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "middle_proxy_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "dcs": {
+          "type": "list[DcStatus]",
+          "rust_type": "Vec<DcStatus>",
+          "omittable": false
+        }
+      }
+    },
+    "DebugClearData": {
+      "source": "src/api/web_runtime.rs",
+      "fields": {
+        "runtime_instance": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "records_cleared": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "leased_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "epoch": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "DeleteUserResponse": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "username": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "in_runtime": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "EffectiveLimitsData": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "update_every_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_reinit_every_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_pool_force_close_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "timeouts": {
+          "type": "EffectiveTimeoutLimits",
+          "rust_type": "EffectiveTimeoutLimits",
+          "omittable": false
+        },
+        "upstream": {
+          "type": "EffectiveUpstreamLimits",
+          "rust_type": "EffectiveUpstreamLimits",
+          "omittable": false
+        },
+        "middle_proxy": {
+          "type": "EffectiveMiddleProxyLimits",
+          "rust_type": "EffectiveMiddleProxyLimits",
+          "omittable": false
+        },
+        "user_ip_policy": {
+          "type": "EffectiveUserIpPolicyLimits",
+          "rust_type": "EffectiveUserIpPolicyLimits",
+          "omittable": false
+        },
+        "user_tcp_policy": {
+          "type": "EffectiveUserTcpPolicyLimits",
+          "rust_type": "EffectiveUserTcpPolicyLimits",
+          "omittable": false
+        }
+      }
+    },
+    "EffectiveMiddleProxyLimits": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "floor_mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "adaptive_floor_idle_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_min_writers_single_endpoint": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "adaptive_floor_min_writers_multi_endpoint": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "adaptive_floor_recover_grace_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_writers_per_core_total": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_cpu_cores_override": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_extra_writers_single_per_core": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_extra_writers_multi_per_core": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_active_writers_per_core": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_warm_writers_per_core": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_active_writers_global": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "adaptive_floor_max_warm_writers_global": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "reconnect_max_concurrent_per_dc": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "reconnect_backoff_base_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reconnect_backoff_cap_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reconnect_fast_retry_count": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "writer_pick_mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "writer_pick_sample_size": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "me2dc_fallback": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "me2dc_fast": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "EffectiveTimeoutLimits": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "client_first_byte_idle_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "client_handshake_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "tg_connect_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "client_keepalive_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "client_ack_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_one_retry": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "me_one_timeout_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "EffectiveUpstreamLimits": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "connect_retry_attempts": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "connect_retry_backoff_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_budget_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "unhealthy_fail_threshold": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "connect_failfast_hard_errors": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "EffectiveUserIpPolicyLimits": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "global_each": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "window_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "EffectiveUserTcpPolicyLimits": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "global_each": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "GoneSessionData": {
+      "source": "src/api/web_runtime.rs",
+      "fields": {
+        "session_ref": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "attempt": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "carrier": {
+          "type": "str",
+          "rust_type": "crate::config::WebCarrier",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "closed_age_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "HealthData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "status": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "read_only": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "HealthReadyData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "ready": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "status": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "admission_open": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "healthy_upstreams": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "total_upstreams": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "LearningResetData": {
+      "source": "src/api/web_runtime.rs",
+      "fields": {
+        "runtime_instance": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "entries_cleared": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "epoch": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "MeWriterStatus": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "writer_id": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "dc": {
+          "type": "int | None",
+          "rust_type": "Option<i16>",
+          "omittable": false
+        },
+        "endpoint": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "draining": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "degraded": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "bound_clients": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "idle_for_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "rtt_ema_ms": {
+          "type": "float | None",
+          "rust_type": "Option<f64>",
+          "omittable": false
+        },
+        "matches_active_generation": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "in_desired_map": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "allow_drain_fallback": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "drain_started_at_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "drain_deadline_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "drain_over_ttl": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "MeWritersData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "middle_proxy_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "summary": {
+          "type": "MeWritersSummary",
+          "rust_type": "MeWritersSummary",
+          "omittable": false
+        },
+        "writers": {
+          "type": "list[MeWriterStatus]",
+          "rust_type": "Vec<MeWriterStatus>",
+          "omittable": false
+        }
+      }
+    },
+    "MeWritersSummary": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "configured_dc_groups": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "configured_endpoints": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "available_endpoints": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "available_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "required_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "alive_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "coverage_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "fresh_alive_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "fresh_coverage_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        }
+      }
+    },
+    "MinimalAllData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "data": {
+          "type": "MinimalAllPayload | None",
+          "rust_type": "Option<MinimalAllPayload>",
+          "omittable": true
+        }
+      }
+    },
+    "MinimalAllPayload": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "me_writers": {
+          "type": "MeWritersData",
+          "rust_type": "MeWritersData",
+          "omittable": false
+        },
+        "dcs": {
+          "type": "DcStatusData",
+          "rust_type": "DcStatusData",
+          "omittable": false
+        },
+        "me_runtime": {
+          "type": "MinimalMeRuntimeData | None",
+          "rust_type": "Option<MinimalMeRuntimeData>",
+          "omittable": true
+        },
+        "network_path": {
+          "type": "list[MinimalDcPathData]",
+          "rust_type": "Vec<MinimalDcPathData>",
+          "omittable": false
+        }
+      }
+    },
+    "MinimalDcPathData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "dc": {
+          "type": "int",
+          "rust_type": "i16",
+          "omittable": false
+        },
+        "ip_preference": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": false
+        },
+        "selected_addr_v4": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        },
+        "selected_addr_v6": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        }
+      }
+    },
+    "MinimalMeRuntimeData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "active_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "warm_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "warm_generations": {
+          "type": "list[int]",
+          "rust_type": "Vec<u64>",
+          "omittable": false
+        },
+        "pending_hardswap_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "pending_hardswap_age_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "reinit_inflight": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "reinit_max_concurrency_effective": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "hardswap_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "floor_mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "adaptive_floor_idle_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_min_writers_single_endpoint": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "adaptive_floor_min_writers_multi_endpoint": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "adaptive_floor_recover_grace_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_writers_per_core_total": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_cpu_cores_override": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_extra_writers_single_per_core": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_extra_writers_multi_per_core": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_active_writers_per_core": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_warm_writers_per_core": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "adaptive_floor_max_active_writers_global": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "adaptive_floor_max_warm_writers_global": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "adaptive_floor_cpu_cores_detected": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "adaptive_floor_cpu_cores_effective": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "adaptive_floor_global_cap_raw": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_global_cap_effective": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_target_writers_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_active_cap_configured": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_active_cap_effective": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_warm_cap_configured": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_warm_cap_effective": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_active_writers_current": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "adaptive_floor_warm_writers_current": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_keepalive_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "me_keepalive_interval_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_keepalive_jitter_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_keepalive_payload_random": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "rpc_proxy_req_every_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_reconnect_max_concurrent_per_dc": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "me_reconnect_backoff_base_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_reconnect_backoff_cap_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_reconnect_fast_retry_count": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "me_pool_drain_ttl_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_pool_force_close_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_pool_min_fresh_ratio": {
+          "type": "float",
+          "rust_type": "f32",
+          "omittable": false
+        },
+        "me_bind_stale_mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "me_bind_stale_ttl_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_single_endpoint_shadow_writers": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "me_single_endpoint_outage_mode_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "me_single_endpoint_outage_disable_quarantine": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "me_single_endpoint_outage_backoff_min_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_single_endpoint_outage_backoff_max_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_single_endpoint_shadow_rotate_every_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "me_deterministic_writer_sort": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "me_writer_pick_mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "me_writer_pick_sample_size": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "me_socks_kdf_policy": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "quarantined_endpoints_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "quarantined_endpoints": {
+          "type": "list[MinimalQuarantineData]",
+          "rust_type": "Vec<MinimalQuarantineData>",
+          "omittable": false
+        }
+      }
+    },
+    "MinimalQuarantineData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "endpoint": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "remaining_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "OperatorDrainStatus": {
+      "source": "src/web/manager/operator_lifecycle/status.rs",
+      "fields": {
+        "operation_id": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "OperatorDrainState",
+          "omittable": false
+        },
+        "outcome": {
+          "type": "str | None",
+          "rust_type": "Option<OperatorDrainOutcome>",
+          "omittable": true
+        },
+        "timeout_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "started_epoch_millis": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "deadline_epoch_millis": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "completed_epoch_millis": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        },
+        "remaining_sessions": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "remaining_streams": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "remaining_websockets": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "force_close_signalled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "OperatorLifecycleStatus": {
+      "source": "src/web/manager/operator_lifecycle/status.rs",
+      "fields": {
+        "state": {
+          "type": "str",
+          "rust_type": "OperatorLifecycleState",
+          "omittable": false
+        },
+        "epoch": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "age_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "admission_open": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "effective_new_work_admission": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "drain": {
+          "type": "OperatorDrainStatus | None",
+          "rust_type": "Option<OperatorDrainStatus>",
+          "omittable": true
+        }
+      }
+    },
+    "PatchConfigResponse": {
+      "source": "src/api/config_edit.rs",
+      "fields": {
+        "revision": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "restart_required": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "runtime_reload_required": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "process_restart_required": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "deferred_process_fields": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "changed": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "reload": {
+          "type": "ReloadAccepted | None",
+          "rust_type": "Option<ReloadAccepted>",
+          "omittable": true
+        }
+      }
+    },
+    "ReloadAccepted": {
+      "source": "src/maestro/reload.rs",
+      "fields": {
+        "reload_id": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "target_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "config_revision": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "ReloadPhase",
+          "omittable": false
+        },
+        "mode": {
+          "type": "str",
+          "rust_type": "ReloadMode",
+          "omittable": false
+        },
+        "failure_policy": {
+          "type": "str",
+          "rust_type": "ReloadFailurePolicy",
+          "omittable": false
+        }
+      }
+    },
+    "ReloadStatus": {
+      "source": "src/maestro/reload.rs",
+      "fields": {
+        "reload_id": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "target_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "config_revision": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "ReloadPhase",
+          "omittable": false
+        },
+        "mode": {
+          "type": "str",
+          "rust_type": "ReloadMode",
+          "omittable": false
+        },
+        "failure_policy": {
+          "type": "str",
+          "rust_type": "ReloadFailurePolicy",
+          "omittable": false
+        },
+        "requested_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "started_at_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        },
+        "finished_at_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        },
+        "deferred_process_fields": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": true
+        },
+        "warnings": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": true
+        },
+        "error": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        }
+      }
+    },
+    "ResetUserQuotaResponse": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "username": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "used_bytes": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "last_reset_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeConnectionCacheData": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "ttl_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "served_from_cache": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "stale_cache_used": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeConnectionTelemetryData": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "user_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "throughput_is_cumulative": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeConnectionTopData": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "limit": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "by_connections": {
+          "type": "list[RuntimeEdgeConnectionUserData]",
+          "rust_type": "Vec<RuntimeEdgeConnectionUserData>",
+          "omittable": false
+        },
+        "by_throughput": {
+          "type": "list[RuntimeEdgeConnectionUserData]",
+          "rust_type": "Vec<RuntimeEdgeConnectionUserData>",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeConnectionTotalsData": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "current_connections": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "current_connections_me": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "current_connections_direct": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "active_users": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeConnectionUserData": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "username": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "current_connections": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "total_octets": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeConnectionsSummaryData": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "data": {
+          "type": "RuntimeEdgeConnectionsSummaryPayload | None",
+          "rust_type": "Option<RuntimeEdgeConnectionsSummaryPayload>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeEdgeConnectionsSummaryPayload": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "cache": {
+          "type": "RuntimeEdgeConnectionCacheData",
+          "rust_type": "RuntimeEdgeConnectionCacheData",
+          "omittable": false
+        },
+        "totals": {
+          "type": "RuntimeEdgeConnectionTotalsData",
+          "rust_type": "RuntimeEdgeConnectionTotalsData",
+          "omittable": false
+        },
+        "top": {
+          "type": "RuntimeEdgeConnectionTopData",
+          "rust_type": "RuntimeEdgeConnectionTopData",
+          "omittable": false
+        },
+        "telemetry": {
+          "type": "RuntimeEdgeConnectionTelemetryData",
+          "rust_type": "RuntimeEdgeConnectionTelemetryData",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeEventsData": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "data": {
+          "type": "RuntimeEdgeEventsPayload | None",
+          "rust_type": "Option<RuntimeEdgeEventsPayload>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeEdgeEventsPayload": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "capacity": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "dropped_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "events": {
+          "type": "list[ApiEventRecord]",
+          "rust_type": "Vec<ApiEventRecord>",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeTlsFingerprintRow": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "scope": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "ja3": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "ja3_raw": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "ja4": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "ja4_raw": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "auth_success": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "bad_or_probe": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "first_seen_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "last_seen_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeEdgeTlsFingerprintsData": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "data": {
+          "type": "RuntimeEdgeTlsFingerprintsPayload | None",
+          "rust_type": "Option<RuntimeEdgeTlsFingerprintsPayload>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeEdgeTlsFingerprintsPayload": {
+      "source": "src/api/runtime_edge.rs",
+      "fields": {
+        "limit": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "retention_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "capacity": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "dropped_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "parse_error_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "by_fingerprint": {
+          "type": "list[RuntimeEdgeTlsFingerprintRow]",
+          "rust_type": "Vec<RuntimeEdgeTlsFingerprintRow>",
+          "omittable": false
+        },
+        "by_ip": {
+          "type": "list[RuntimeEdgeTlsFingerprintRow]",
+          "rust_type": "Vec<RuntimeEdgeTlsFingerprintRow>",
+          "omittable": false
+        },
+        "by_cidr": {
+          "type": "list[RuntimeEdgeTlsFingerprintRow]",
+          "rust_type": "Vec<RuntimeEdgeTlsFingerprintRow>",
+          "omittable": false
+        },
+        "by_user": {
+          "type": "list[RuntimeEdgeTlsFingerprintRow]",
+          "rust_type": "Vec<RuntimeEdgeTlsFingerprintRow>",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeGatesData": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "accepting_new_connections": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "conditional_cast_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "me_runtime_ready": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "me2dc_fallback_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "me2dc_fast_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "use_middle_proxy": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "route_mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "reroute_active": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reroute_to_direct_at_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        },
+        "reroute_reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "startup_status": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "startup_stage": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "startup_progress_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeInitializationComponentData": {
+      "source": "src/api/runtime_init.rs",
+      "fields": {
+        "id": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "title": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "status": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "started_at_epoch_ms": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "finished_at_epoch_ms": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "duration_ms": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "attempts": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "details": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeInitializationData": {
+      "source": "src/api/runtime_init.rs",
+      "fields": {
+        "status": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "degraded": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "current_stage": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "progress_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "started_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "ready_at_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        },
+        "total_elapsed_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "transport_mode": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "me": {
+          "type": "RuntimeInitializationMeData",
+          "rust_type": "RuntimeInitializationMeData",
+          "omittable": false
+        },
+        "components": {
+          "type": "list[RuntimeInitializationComponentData]",
+          "rust_type": "Vec<RuntimeInitializationComponentData>",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeInitializationMeData": {
+      "source": "src/api/runtime_init.rs",
+      "fields": {
+        "status": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "current_stage": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "progress_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "init_attempt": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "retry_limit": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "last_error": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeMePoolStateData": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "data": {
+          "type": "RuntimeMePoolStatePayload | None",
+          "rust_type": "Option<RuntimeMePoolStatePayload>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeMePoolStateGenerationData": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "active_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "warm_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "warm_generations": {
+          "type": "list[int]",
+          "rust_type": "Vec<u64>",
+          "omittable": false
+        },
+        "pending_hardswap_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "pending_hardswap_age_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "reinit_inflight": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "reinit_max_concurrency_effective": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "draining_generations": {
+          "type": "list[int]",
+          "rust_type": "Vec<u64>",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMePoolStateHardswapData": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "pending": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "pending_writers_current": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_writer_deficit": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_missing_dc_groups": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_map_current": {
+          "type": "bool | None",
+          "rust_type": "Option<bool>",
+          "omittable": false
+        },
+        "orphan_warm_writers_current": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "replacement_preparing_current": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "replacement_retiring_current": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMePoolStatePayload": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "generations": {
+          "type": "RuntimeMePoolStateGenerationData",
+          "rust_type": "RuntimeMePoolStateGenerationData",
+          "omittable": false
+        },
+        "hardswap": {
+          "type": "RuntimeMePoolStateHardswapData",
+          "rust_type": "RuntimeMePoolStateHardswapData",
+          "omittable": false
+        },
+        "writers": {
+          "type": "RuntimeMePoolStateWriterData",
+          "rust_type": "RuntimeMePoolStateWriterData",
+          "omittable": false
+        },
+        "refill": {
+          "type": "RuntimeMePoolStateRefillData",
+          "rust_type": "RuntimeMePoolStateRefillData",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMePoolStateRefillData": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "inflight_endpoints_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "inflight_dc_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "running_dc_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_dc_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "by_dc": {
+          "type": "list[RuntimeMePoolStateRefillDcData]",
+          "rust_type": "Vec<RuntimeMePoolStateRefillDcData>",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMePoolStateRefillDcData": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "dc": {
+          "type": "int",
+          "rust_type": "i16",
+          "omittable": false
+        },
+        "family": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "inflight": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMePoolStateWriterContourData": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "warm": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "active": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "draining": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMePoolStateWriterData": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "alive_non_draining": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "draining": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "degraded": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "contour": {
+          "type": "RuntimeMePoolStateWriterContourData",
+          "rust_type": "RuntimeMePoolStateWriterContourData",
+          "omittable": false
+        },
+        "health": {
+          "type": "RuntimeMePoolStateWriterHealthData",
+          "rust_type": "RuntimeMePoolStateWriterHealthData",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMePoolStateWriterHealthData": {
+      "source": "src/api/runtime_min/me_pool.rs",
+      "fields": {
+        "healthy": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "degraded": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "draining": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeQualityCountersData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "idle_close_by_peer_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reader_eof_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "kdf_drift_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "kdf_port_only_drift_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reconnect_attempt_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reconnect_success_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeQualityData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "data": {
+          "type": "RuntimeMeQualityPayload | None",
+          "rust_type": "Option<RuntimeMeQualityPayload>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeMeQualityDcRttData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "dc": {
+          "type": "int",
+          "rust_type": "i16",
+          "omittable": false
+        },
+        "rtt_ema_ms": {
+          "type": "float | None",
+          "rust_type": "Option<f64>",
+          "omittable": false
+        },
+        "alive_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "required_writers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "coverage_pct": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeQualityDrainGateData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "route_quorum_ok": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "redundancy_ok": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "block_reason": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "updated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeQualityFamilyStateData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "family": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "state_since_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "suppressed_until_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        },
+        "fail_streak": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "recover_success_streak": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeQualityPayload": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "counters": {
+          "type": "RuntimeMeQualityCountersData",
+          "rust_type": "RuntimeMeQualityCountersData",
+          "omittable": false
+        },
+        "route_drops": {
+          "type": "RuntimeMeQualityRouteDropData",
+          "rust_type": "RuntimeMeQualityRouteDropData",
+          "omittable": false
+        },
+        "family_states": {
+          "type": "list[RuntimeMeQualityFamilyStateData]",
+          "rust_type": "Vec<RuntimeMeQualityFamilyStateData>",
+          "omittable": false
+        },
+        "drain_gate": {
+          "type": "RuntimeMeQualityDrainGateData",
+          "rust_type": "RuntimeMeQualityDrainGateData",
+          "omittable": false
+        },
+        "dc_rtt": {
+          "type": "list[RuntimeMeQualityDcRttData]",
+          "rust_type": "Vec<RuntimeMeQualityDcRttData>",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeQualityRouteDropData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "no_conn_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "channel_closed_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "queue_full_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "queue_full_base_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "queue_full_high_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeSelftestBndData": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "addr_state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "port_state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "last_addr": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "last_seen_age_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeMeSelftestData": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "data": {
+          "type": "RuntimeMeSelftestPayload | None",
+          "rust_type": "Option<RuntimeMeSelftestPayload>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeMeSelftestIpData": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "v4": {
+          "type": "RuntimeMeSelftestIpFamilyData | None",
+          "rust_type": "Option<RuntimeMeSelftestIpFamilyData>",
+          "omittable": true
+        },
+        "v6": {
+          "type": "RuntimeMeSelftestIpFamilyData | None",
+          "rust_type": "Option<RuntimeMeSelftestIpFamilyData>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeMeSelftestIpFamilyData": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "addr": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeSelftestKdfData": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "ewma_errors_per_min": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "threshold_errors_per_min": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "errors_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeSelftestPayload": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "kdf": {
+          "type": "RuntimeMeSelftestKdfData",
+          "rust_type": "RuntimeMeSelftestKdfData",
+          "omittable": false
+        },
+        "timeskew": {
+          "type": "RuntimeMeSelftestTimeskewData",
+          "rust_type": "RuntimeMeSelftestTimeskewData",
+          "omittable": false
+        },
+        "ip": {
+          "type": "RuntimeMeSelftestIpData",
+          "rust_type": "RuntimeMeSelftestIpData",
+          "omittable": false
+        },
+        "pid": {
+          "type": "RuntimeMeSelftestPidData",
+          "rust_type": "RuntimeMeSelftestPidData",
+          "omittable": false
+        },
+        "bnd": {
+          "type": "RuntimeMeSelftestBndData | None",
+          "rust_type": "Option<RuntimeMeSelftestBndData>",
+          "omittable": false
+        },
+        "upstreams": {
+          "type": "list[RuntimeMeSelftestUpstreamData] | None",
+          "rust_type": "Option<Vec<RuntimeMeSelftestUpstreamData>>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeMeSelftestPidData": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "pid": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeMeSelftestTimeskewData": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "max_skew_secs_15m": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "samples_15m": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "last_skew_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        },
+        "last_source": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "last_seen_age_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeMeSelftestUpstreamData": {
+      "source": "src/api/runtime_selftest.rs",
+      "fields": {
+        "upstream_id": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "route_kind": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "address": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "bnd": {
+          "type": "RuntimeMeSelftestBndData | None",
+          "rust_type": "Option<RuntimeMeSelftestBndData>",
+          "omittable": true
+        },
+        "ip": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeNatStunData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "data": {
+          "type": "RuntimeNatStunPayload | None",
+          "rust_type": "Option<RuntimeNatStunPayload>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeNatStunFlagsData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "nat_probe_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "nat_probe_disabled_runtime": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "nat_probe_attempts": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeNatStunPayload": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "flags": {
+          "type": "RuntimeNatStunFlagsData",
+          "rust_type": "RuntimeNatStunFlagsData",
+          "omittable": false
+        },
+        "servers": {
+          "type": "RuntimeNatStunServersData",
+          "rust_type": "RuntimeNatStunServersData",
+          "omittable": false
+        },
+        "reflection": {
+          "type": "RuntimeNatStunReflectionBlockData",
+          "rust_type": "RuntimeNatStunReflectionBlockData",
+          "omittable": false
+        },
+        "stun_backoff_remaining_ms": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeNatStunReflectionBlockData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "v4": {
+          "type": "RuntimeNatStunReflectionData | None",
+          "rust_type": "Option<RuntimeNatStunReflectionData>",
+          "omittable": true
+        },
+        "v6": {
+          "type": "RuntimeNatStunReflectionData | None",
+          "rust_type": "Option<RuntimeNatStunReflectionData>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeNatStunReflectionData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "addr": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "age_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeNatStunServersData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "configured": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "live": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "live_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeUpstreamQualityCountersData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "connect_attempt_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_success_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_fail_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_failfast_hard_error_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeUpstreamQualityData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "policy": {
+          "type": "RuntimeUpstreamQualityPolicyData",
+          "rust_type": "RuntimeUpstreamQualityPolicyData",
+          "omittable": false
+        },
+        "counters": {
+          "type": "RuntimeUpstreamQualityCountersData",
+          "rust_type": "RuntimeUpstreamQualityCountersData",
+          "omittable": false
+        },
+        "summary": {
+          "type": "RuntimeUpstreamQualitySummaryData | None",
+          "rust_type": "Option<RuntimeUpstreamQualitySummaryData>",
+          "omittable": true
+        },
+        "upstreams": {
+          "type": "list[RuntimeUpstreamQualityUpstreamData] | None",
+          "rust_type": "Option<Vec<RuntimeUpstreamQualityUpstreamData>>",
+          "omittable": true
+        }
+      }
+    },
+    "RuntimeUpstreamQualityDcData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "dc": {
+          "type": "int",
+          "rust_type": "i16",
+          "omittable": false
+        },
+        "latency_ema_ms": {
+          "type": "float | None",
+          "rust_type": "Option<f64>",
+          "omittable": false
+        },
+        "ip_preference": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeUpstreamQualityPolicyData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "connect_retry_attempts": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "connect_retry_backoff_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_budget_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "unhealthy_fail_threshold": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "connect_failfast_hard_errors": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeUpstreamQualitySummaryData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "configured_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "healthy_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "unhealthy_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "direct_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "socks4_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "socks5_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "shadowsocks_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeUpstreamQualityUpstreamData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "upstream_id": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "route_kind": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "address": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "weight": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "scopes": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "healthy": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "fails": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "last_check_age_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "effective_latency_ms": {
+          "type": "float | None",
+          "rust_type": "Option<f64>",
+          "omittable": false
+        },
+        "dc": {
+          "type": "list[RuntimeUpstreamQualityDcData]",
+          "rust_type": "Vec<RuntimeUpstreamQualityDcData>",
+          "omittable": false
+        }
+      }
+    },
+    "SecurityPostureData": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "api_read_only": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "api_whitelist_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "api_whitelist_entries": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "api_auth_header_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "proxy_protocol_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "log_level": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "telemetry_core_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "telemetry_user_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "telemetry_me_level": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        }
+      }
+    },
+    "SecurityWhitelistData": {
+      "source": "src/api/runtime_min.rs",
+      "fields": {
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "entries_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "entries": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        }
+      }
+    },
+    "SessionPage": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "sessions": {
+          "type": "list[SessionRow]",
+          "rust_type": "Vec<SessionRow>",
+          "omittable": false
+        },
+        "next_cursor": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        },
+        "scanned": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "scan_truncated": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "partial_sessions": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "partial": {
+          "type": "list[str]",
+          "rust_type": "Vec<&'static str>",
+          "omittable": false
+        }
+      }
+    },
+    "SessionRow": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "session_ref": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "user_agent": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "user_agent_id": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "trace_session_id": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "client_ip": {
+          "type": "str",
+          "rust_type": "std::net::IpAddr",
+          "omittable": false
+        },
+        "host": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "user": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "key_id": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "carrier": {
+          "type": "str",
+          "rust_type": "WebCarrier",
+          "omittable": false
+        },
+        "attempt": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "client_class": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "automatic": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "health_publication": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "streams": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "tasks": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "lanes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "lane_open_waits": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "websocket_lane_reservations": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "websocket_active": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "pending_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_items": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "control_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "control_items": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "age_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "idle_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "peer_idle_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reconnect_grace_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "peer_deadline_remaining_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "negotiation_remaining_ms": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        }
+      }
+    },
+    "SummaryData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "uptime_seconds": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "connections_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connections_bad_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connections_bad_by_class": {
+          "type": "list[ClassCount]",
+          "rust_type": "Vec<ClassCount>",
+          "omittable": false
+        },
+        "handshake_failures_by_class": {
+          "type": "list[ClassCount]",
+          "rust_type": "Vec<ClassCount>",
+          "omittable": false
+        },
+        "handshake_timeouts_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "configured_users": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "SystemInfoData": {
+      "source": "src/api/runtime_zero.rs",
+      "fields": {
+        "version": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "target_arch": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "target_os": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "build_profile": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "git_commit": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "build_time_utc": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "rustc_version": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "process_started_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "uptime_seconds": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "config_path": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "config_hash": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "config_reload_count": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "last_config_reload_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        }
+      }
+    },
+    "TlsDomainLink": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "domain": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "link": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        }
+      }
+    },
+    "UpstreamDcStatus": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "dc": {
+          "type": "int",
+          "rust_type": "i16",
+          "omittable": false
+        },
+        "latency_ema_ms": {
+          "type": "float | None",
+          "rust_type": "Option<f64>",
+          "omittable": false
+        },
+        "ip_preference": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
+    "UpstreamStatus": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "upstream_id": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "route_kind": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "address": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "weight": {
+          "type": "int",
+          "rust_type": "u16",
+          "omittable": false
+        },
+        "scopes": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "healthy": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "fails": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "last_check_age_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "effective_latency_ms": {
+          "type": "float | None",
+          "rust_type": "Option<f64>",
+          "omittable": false
+        },
+        "dc": {
+          "type": "list[UpstreamDcStatus]",
+          "rust_type": "Vec<UpstreamDcStatus>",
+          "omittable": false
+        }
+      }
+    },
+    "UpstreamSummaryData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "configured_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "healthy_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "unhealthy_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "direct_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "socks4_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "socks5_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "shadowsocks_total": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "UpstreamsData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "zero": {
+          "type": "ZeroUpstreamData",
+          "rust_type": "ZeroUpstreamData",
+          "omittable": false
+        },
+        "summary": {
+          "type": "UpstreamSummaryData | None",
+          "rust_type": "Option<UpstreamSummaryData>",
+          "omittable": true
+        },
+        "upstreams": {
+          "type": "list[UpstreamStatus] | None",
+          "rust_type": "Option<Vec<UpstreamStatus>>",
+          "omittable": true
+        }
+      }
+    },
+    "UserActiveIps": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "username": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "active_ips": {
+          "type": "list[str]",
+          "rust_type": "Vec<IpAddr>",
+          "omittable": false
+        }
+      }
+    },
+    "UserInfo": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "username": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "in_runtime": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "user_ad_tag": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        },
+        "max_tcp_conns": {
+          "type": "int | None",
+          "rust_type": "Option<usize>",
+          "omittable": false
+        },
+        "expiration_rfc3339": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        },
+        "data_quota_bytes": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "quota_period": {
+          "type": "str | None",
+          "rust_type": "Option<crate::config::UserQuotaPeriod>",
+          "omittable": false
+        },
+        "rate_limit_up_bps": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "rate_limit_down_bps": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "max_unique_ips": {
+          "type": "int | None",
+          "rust_type": "Option<usize>",
+          "omittable": false
+        },
+        "current_connections": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "active_unique_ips": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "active_unique_ips_list": {
+          "type": "list[str]",
+          "rust_type": "Vec<IpAddr>",
+          "omittable": false
+        },
+        "recent_unique_ips": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "recent_unique_ips_list": {
+          "type": "list[str]",
+          "rust_type": "Vec<IpAddr>",
+          "omittable": false
+        },
+        "total_octets": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "links": {
+          "type": "UserLinks",
+          "rust_type": "UserLinks",
+          "omittable": false
+        }
+      }
+    },
+    "UserLinks": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "classic": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "secure": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "tls": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "tls_domains": {
+          "type": "list[TlsDomainLink]",
+          "rust_type": "Vec<TlsDomainLink>",
+          "omittable": false
+        }
+      }
+    },
+    "UserQuota": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "username": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "data_quota_bytes": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "quota_period": {
+          "type": "str | None",
+          "rust_type": "Option<crate::config::UserQuotaPeriod>",
+          "omittable": false
+        },
+        "active_quota_period": {
+          "type": "str | None",
+          "rust_type": "Option<UserQuotaPeriod>",
+          "omittable": false
+        },
+        "quota_period_start_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "quota_next_reset_epoch_secs": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "quota_schedule_state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "used_bytes": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "last_reset_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "UserQuotaData": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "users": {
+          "type": "list[UserQuota]",
+          "rust_type": "Vec<UserQuotaEntry>",
+          "omittable": false
+        }
+      }
+    },
+    "WebBridgeRecoveryCounter": {
+      "source": "src/web/telemetry/lifecycle.rs",
+      "fields": {
+        "event": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebBudgetStatus": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "queue_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "queue_items": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "control_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "control_items": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "websocket_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "high_water_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "owners": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "closed": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "WebCapacityResourceStatus": {
+      "source": "src/web/manager/observability.rs",
+      "fields": {
+        "resource": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "unit": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "used": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "available": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "limit": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "closed": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "WebCapacityStatus": {
+      "source": "src/api/web_runtime/observability.rs",
+      "fields": {
+        "http_connection_capacity_action": {
+          "type": "str",
+          "rust_type": "WebHttpConnectionCapacityAction",
+          "omittable": false
+        },
+        "max_http_overload_connections": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "http_overload_timeout_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "resources": {
+          "type": "list[WebCapacityResourceStatus]",
+          "rust_type": "Vec<WebCapacityResourceStatus>",
+          "omittable": false
+        },
+        "saturated_resources": {
+          "type": "list[str]",
+          "rust_type": "Vec<&'static str>",
+          "omittable": false
+        },
+        "partial": {
+          "type": "list[str]",
+          "rust_type": "Vec<&'static str>",
+          "omittable": false
+        },
+        "rejections": {
+          "type": "list[WebRejectionCounter]",
+          "rust_type": "Vec<WebRejectionCounter>",
+          "omittable": false
+        },
+        "http_connection_overload_outcomes": {
+          "type": "list[WebOutcomeCounter]",
+          "rust_type": "Vec<WebOutcomeCounter>",
+          "omittable": false
+        }
+      }
+    },
+    "WebCarrierFailureCounter": {
+      "source": "src/web/telemetry/carrier.rs",
+      "fields": {
+        "carrier": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "phase": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebCarrierLearningCounter": {
+      "source": "src/web/telemetry/carrier.rs",
+      "fields": {
+        "carrier": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "outcome": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebCarrierNegotiationStatus": {
+      "source": "src/api/web_runtime/observability.rs",
+      "fields": {
+        "selections": {
+          "type": "list[WebCarrierSelectionCounter]",
+          "rust_type": "Vec<WebCarrierSelectionCounter>",
+          "omittable": false
+        },
+        "reported_failures": {
+          "type": "list[WebCarrierFailureCounter]",
+          "rust_type": "Vec<WebCarrierFailureCounter>",
+          "omittable": false
+        },
+        "learning_outcomes": {
+          "type": "list[WebCarrierLearningCounter]",
+          "rust_type": "Vec<WebCarrierLearningCounter>",
+          "omittable": false
+        }
+      }
+    },
+    "WebCarrierSelectionCounter": {
+      "source": "src/web/telemetry/carrier.rs",
+      "fields": {
+        "carrier": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "disposition": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebDebugConfig": {
+      "source": "src/config/types/web_debug.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "sideband": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "capture_lifecycle": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "capture_headers": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "capture_timings": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "capture_frames": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "body_capture": {
+          "type": "str",
+          "rust_type": "WebDebugBodyCapture",
+          "omittable": false
+        },
+        "body_prefix_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "decoy_body_prefix_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "default_window_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "max_window_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebDebugStatus": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "policy": {
+          "type": "WebDebugConfig",
+          "rust_type": "WebDebugConfig",
+          "omittable": false
+        },
+        "policy_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "epoch": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "records": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "records_capacity": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "used_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "bytes_capacity": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "contention_drops": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "evictions": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "byte_truncations": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "earliest_seq": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "latest_seq": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        }
+      }
+    },
+    "WebDecoyFastTrackCounter": {
+      "source": "src/web/telemetry/fasttrack.rs",
+      "fields": {
+        "disposition": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebDecoyFastTrackStatus": {
+      "source": "src/api/web_runtime/observability.rs",
+      "fields": {
+        "mode": {
+          "type": "str",
+          "rust_type": "WebDecoyFastTrackMode",
+          "omittable": false
+        },
+        "requests": {
+          "type": "list[WebDecoyFastTrackCounter]",
+          "rust_type": "Vec<WebDecoyFastTrackCounter>",
+          "omittable": false
+        }
+      }
+    },
+    "WebDecoyUpstreamStatus": {
+      "source": "src/api/web_runtime/observability.rs",
+      "fields": {
+        "outcomes": {
+          "type": "list[WebOutcomeCounter]",
+          "rust_type": "Vec<WebOutcomeCounter>",
+          "omittable": false
+        },
+        "last_outcome": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "last_outcome_age_ms": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        }
+      }
+    },
+    "WebIngressStatus": {
+      "source": "src/api/web_runtime/observability.rs",
+      "fields": {
+        "configured_listeners": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "live_acceptors": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "accepting_connections": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "tcp_accept_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "tcp_accept_error_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebLearningStatus": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "aggressiveness": {
+          "type": "str",
+          "rust_type": "WebCarrierNegotiationAggressiveness",
+          "omittable": false
+        },
+        "policy_generation": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "epoch": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "entries": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "capacity": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "lifetime_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "health_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "age_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebLifecycleCountersStatus": {
+      "source": "src/api/web_runtime/observability.rs",
+      "fields": {
+        "bridge_recovery_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "session_closures": {
+          "type": "list[WebSessionCloseCounter]",
+          "rust_type": "Vec<WebSessionCloseCounter>",
+          "omittable": false
+        },
+        "session_observations": {
+          "type": "list[WebSessionLifecycleObservationCounter]",
+          "rust_type": "Vec<WebSessionLifecycleObservationCounter>",
+          "omittable": false
+        },
+        "bridge_recovery_events": {
+          "type": "list[WebBridgeRecoveryCounter]",
+          "rust_type": "Vec<WebBridgeRecoveryCounter>",
+          "omittable": false
+        }
+      }
+    },
+    "WebLimitsConfig": {
+      "source": "src/config/types/web.rs",
+      "fields": {
+        "wildcard": {
+          "type": "WebWildcardLimitsConfig",
+          "rust_type": "WebWildcardLimitsConfig",
+          "omittable": false
+        },
+        "max_header_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_body_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_frame_payload_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "carrier_batch_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_frames_per_body": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_http_connections": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_http_overload_connections": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_http_handlers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_lane_open_waits_per_session": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_bytes_per_lane": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_items_per_lane": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "websocket_bytes_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "websocket_admission_watermark_pct": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "websocket_eviction_watermark_pct": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "websocket_http_connection_reserve": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_websocket_evictions_in_flight": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_carrier_learning_entries": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_body_readers": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_body_bytes_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_sessions_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_sessions_per_ip": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_streams_per_session": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_streams_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_stream_handshakes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_tombstones_per_session": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_bytes_per_session": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_bytes_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_items_per_session": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_items_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "control_bytes_per_session": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "control_bytes_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_bootstraps_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_bootstraps_per_ip": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_vhosts": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_profiles": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_static_files": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_static_file_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_static_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "debug_records_capacity": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "debug_bytes_global": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "memory_envelope_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "new_bootstraps_per_minute": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "new_bootstraps_burst": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "new_sessions_per_minute": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "new_sessions_burst": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "new_streams_per_minute": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "new_streams_burst": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        }
+      }
+    },
+    "WebManagerStatus": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "issuance_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "issuance_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "shutdown": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "bootstraps": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "sessions": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "closed_tokens": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "closed_sessions": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "client_ips": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "profiles": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "WebOutcomeCounter": {
+      "source": "src/web/telemetry.rs",
+      "fields": {
+        "outcome": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebPermitStatus": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "used": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "available": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "capacity": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "closed": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "WebRejectionCounter": {
+      "source": "src/web/telemetry.rs",
+      "fields": {
+        "reason": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebRuntimeStatus": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "runtime_instance": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "generation_id": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "limits": {
+          "type": "WebLimitsConfig",
+          "rust_type": "WebLimitsConfig",
+          "omittable": false
+        },
+        "manager": {
+          "type": "WebManagerStatus | None",
+          "rust_type": "Option<ManagerStatus>",
+          "omittable": false
+        },
+        "streams": {
+          "type": "WebStreamStatus | None",
+          "rust_type": "Option<StreamStatus>",
+          "omittable": false
+        },
+        "budget": {
+          "type": "WebBudgetStatus | None",
+          "rust_type": "Option<BudgetStatus>",
+          "omittable": false
+        },
+        "websockets": {
+          "type": "WebSocketStatus | None",
+          "rust_type": "Option<WebSocketStatus>",
+          "omittable": false
+        },
+        "learning": {
+          "type": "WebLearningStatus | None",
+          "rust_type": "Option<LearningStatus>",
+          "omittable": false
+        },
+        "debug": {
+          "type": "WebDebugStatus | None",
+          "rust_type": "Option<DebugStatus>",
+          "omittable": false
+        },
+        "permits": {
+          "type": "list[tuple[str, WebPermitStatus]]",
+          "rust_type": "Vec<(&'static str, PermitStatus)>",
+          "omittable": false
+        },
+        "auxiliary_tasks": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "session_incarnations_created": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "session_incarnations_closed": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "streams_opened": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "streams_rejected": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "bytes_up": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "bytes_down": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "limit_hits": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "partial": {
+          "type": "list[str]",
+          "rust_type": "Vec<&'static str>",
+          "omittable": false
+        }
+      }
+    },
+    "WebSessionCloseCounter": {
+      "source": "src/web/telemetry/lifecycle.rs",
+      "fields": {
+        "carrier": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebSessionLifecycleObservationCounter": {
+      "source": "src/web/telemetry/lifecycle.rs",
+      "fields": {
+        "carrier": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "observation": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "WebSessionStatus": {
+      "source": "src/web/session/status.rs",
+      "fields": {
+        "trace_session_id": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "client_ip": {
+          "type": "str",
+          "rust_type": "std::net::IpAddr",
+          "omittable": false
+        },
+        "host": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "user": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "key_id": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "carrier": {
+          "type": "str",
+          "rust_type": "WebCarrier",
+          "omittable": false
+        },
+        "attempt": {
+          "type": "int",
+          "rust_type": "u8",
+          "omittable": false
+        },
+        "client_class": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "automatic": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "state": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "health_publication": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "streams": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "tasks": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "lanes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "lane_open_waits": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "websocket_lane_reservations": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "websocket_active": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "pending_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "pending_items": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "control_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "control_items": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "age_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "idle_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "peer_idle_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reconnect_grace_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "peer_deadline_remaining_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "negotiation_remaining_ms": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": true
+        }
+      }
+    },
+    "WebSocketStatus": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "entries": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "claims": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "evictions_in_flight": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "closed": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "WebStatusData": {
+      "source": "src/api/web_runtime.rs",
+      "fields": {
+        "lifecycle": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "lifecycle_epoch": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "lifecycle_age_ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "available": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "listeners": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "effective_config_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "ingress": {
+          "type": "WebIngressStatus",
+          "rust_type": "WebIngressStatus",
+          "omittable": false
+        },
+        "capacity": {
+          "type": "WebCapacityStatus",
+          "rust_type": "WebCapacityStatus",
+          "omittable": false
+        },
+        "decoy_upstream": {
+          "type": "WebDecoyUpstreamStatus",
+          "rust_type": "WebDecoyUpstreamStatus",
+          "omittable": false
+        },
+        "decoy_fasttrack": {
+          "type": "WebDecoyFastTrackStatus",
+          "rust_type": "WebDecoyFastTrackStatus",
+          "omittable": false
+        },
+        "carrier_negotiation": {
+          "type": "WebCarrierNegotiationStatus",
+          "rust_type": "WebCarrierNegotiationStatus",
+          "omittable": false
+        },
+        "lifecycle_counters": {
+          "type": "WebLifecycleCountersStatus",
+          "rust_type": "WebLifecycleCountersStatus",
+          "omittable": false
+        },
+        "operator_lifecycle": {
+          "type": "OperatorLifecycleStatus | None",
+          "rust_type": "Option<crate::web::manager::OperatorLifecycleStatus>",
+          "omittable": true
+        },
+        "runtime": {
+          "type": "WebRuntimeStatus | None",
+          "rust_type": "Option<crate::web::manager::WebRuntimeStatus>",
+          "omittable": true
+        }
+      }
+    },
+    "WebStreamStatus": {
+      "source": "src/web/manager/status.rs",
+      "fields": {
+        "live": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "profiles": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "closed": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
+    "WebWildcardLimitsConfig": {
+      "source": "src/config/types/web/wildcard.rs",
+      "fields": {
+        "max_rules": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "max_profiles_per_request": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "cache_hosts": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "cache_bytes": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "cold_hmac_per_minute": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "cold_hmac_burst": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        }
+      }
+    },
+    "ZeroAllData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "generated_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "core": {
+          "type": "ZeroCoreData",
+          "rust_type": "ZeroCoreData",
+          "omittable": false
+        },
+        "upstream": {
+          "type": "ZeroUpstreamData",
+          "rust_type": "ZeroUpstreamData",
+          "omittable": false
+        },
+        "middle_proxy": {
+          "type": "ZeroMiddleProxyData",
+          "rust_type": "ZeroMiddleProxyData",
+          "omittable": false
+        },
+        "pool": {
+          "type": "ZeroPoolData",
+          "rust_type": "ZeroPoolData",
+          "omittable": false
+        },
+        "desync": {
+          "type": "ZeroDesyncData",
+          "rust_type": "ZeroDesyncData",
+          "omittable": false
+        }
+      }
+    },
+    "ZeroCodeCount": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "code": {
+          "type": "int",
+          "rust_type": "i32",
+          "omittable": false
+        },
+        "total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "ZeroCoreData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "uptime_seconds": {
+          "type": "float",
+          "rust_type": "f64",
+          "omittable": false
+        },
+        "connections_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connections_bad_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connections_bad_by_class": {
+          "type": "list[ClassCount]",
+          "rust_type": "Vec<ClassCount>",
+          "omittable": false
+        },
+        "handshake_failures_by_class": {
+          "type": "list[ClassCount]",
+          "rust_type": "Vec<ClassCount>",
+          "omittable": false
+        },
+        "handshake_timeouts_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "accept_permit_timeout_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "configured_users": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "telemetry_core_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "telemetry_user_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "telemetry_me_level": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "conntrack_control_enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "conntrack_control_available": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "conntrack_pressure_active": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "conntrack_event_queue_depth": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_rule_apply_ok": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "conntrack_rule_reconcile_success_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_rule_reconcile_error_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_rule_rollback_success_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_rule_rollback_error_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_delete_attempt_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_delete_success_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_delete_not_found_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_delete_error_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "conntrack_close_event_drop_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "ZeroDesyncData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "secure_padding_invalid_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "desync_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "desync_full_logged_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "desync_suppressed_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "desync_frames_bucket_0": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "desync_frames_bucket_1_2": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "desync_frames_bucket_3_10": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "desync_frames_bucket_gt_10": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "ZeroMiddleProxyData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "keepalive_sent_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "keepalive_failed_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "keepalive_pong_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "keepalive_timeout_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "rpc_proxy_req_signal_sent_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "rpc_proxy_req_signal_failed_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "rpc_proxy_req_signal_skipped_no_meta_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "rpc_proxy_req_signal_response_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "rpc_proxy_req_signal_close_sent_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reconnect_attempt_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reconnect_success_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "handshake_reject_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "handshake_error_codes": {
+          "type": "list[ZeroCodeCount]",
+          "rust_type": "Vec<ZeroCodeCount>",
+          "omittable": false
+        },
+        "handshake_error_code_overflow_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "reader_eof_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "idle_close_by_peer_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "route_drop_no_conn_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "route_drop_channel_closed_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "route_drop_queue_full_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "route_drop_queue_full_base_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "route_drop_queue_full_high_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_batches_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_batch_frames_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_batch_bytes_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_flush_reason_queue_drain_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_flush_reason_batch_frames_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_flush_reason_batch_bytes_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_flush_reason_max_delay_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_flush_reason_ack_immediate_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_flush_reason_close_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_data_frames_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_ack_frames_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_payload_bytes_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_write_mode_coalesced_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_write_mode_split_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_quota_reject_pre_write_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_quota_reject_post_write_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_frame_buf_shrink_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "d2c_frame_buf_shrink_bytes_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "socks_kdf_strict_reject_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "socks_kdf_compat_fallback_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "endpoint_quarantine_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "kdf_drift_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "kdf_port_only_drift_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "hardswap_pending_reuse_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "hardswap_pending_ttl_expired_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "single_endpoint_outage_enter_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "single_endpoint_outage_exit_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "single_endpoint_outage_reconnect_attempt_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "single_endpoint_outage_reconnect_success_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "single_endpoint_quarantine_bypass_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "single_endpoint_shadow_rotate_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "single_endpoint_shadow_rotate_skipped_quarantine_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "floor_mode_switch_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "floor_mode_switch_static_to_adaptive_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "floor_mode_switch_adaptive_to_static_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "ZeroPoolData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "pool_swap_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "pool_drain_active": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "pool_force_close_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "pool_stale_pick_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "writer_removed_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "writer_removed_unexpected_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "refill_triggered_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "refill_skipped_inflight_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "refill_failed_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "writer_restored_same_endpoint_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "writer_restored_fallback_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "ZeroUpstreamData": {
+      "source": "src/api/model.rs",
+      "fields": {
+        "connect_attempt_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_success_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_fail_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_failfast_hard_error_total": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_attempts_bucket_1": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_attempts_bucket_2": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_attempts_bucket_3_4": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_attempts_bucket_gt_4": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_duration_success_bucket_le_100ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_duration_success_bucket_101_500ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_duration_success_bucket_501_1000ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_duration_success_bucket_gt_1000ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_duration_fail_bucket_le_100ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_duration_fail_bucket_101_500ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_duration_fail_bucket_501_1000ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "connect_duration_fail_bucket_gt_1000ms": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    }
+  }
+}
