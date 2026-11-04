@@ -21,6 +21,17 @@
   <a href="https://github.com/Peakora-VPN/telemt-sdk/issues">Issues</a>
 </p>
 
+<p align="center"><strong>🤝 Project sponsor — Peakora VPN</strong></p>
+<p align="center">
+  <a href="https://peakora.network/">
+    <img src="https://peakora.network/social-preview.png" width="600" alt="Peakora VPN — internet at your own pace">
+  </a>
+</p>
+<p align="center">
+  Secure access to the internet and AI services, with setup through Telegram.<br>
+  <a href="https://peakora.network/">Discover Peakora →</a>
+</p>
+
 Manage proxy users, quotas, configuration, runtime diagnostics and WEB sessions from Python.
 `TelemtClient` groups operations into resource objects, reuses HTTP connections and returns
 Pydantic models with concrete type annotations throughout nested responses.

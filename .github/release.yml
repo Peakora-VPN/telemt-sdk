@@ -1,0 +1,18 @@
+changelog:
+  exclude:
+    labels: [skip-changelog]
+  categories:
+    - title: "⚠️ Изменения совместимости"
+      labels: [breaking-change]
+    - title: "✨ Новые возможности"
+      labels: [enhancement, feature]
+    - title: "🐛 Исправления"
+      labels: [bug, fix]
+    - title: "📚 Документация"
+      labels: [documentation]
+    - title: "📦 Зависимости"
+      labels: [dependencies]
+    - title: "🧪 Тесты и автоматизация"
+      labels: [tests, ci]
+    - title: "🔧 Другие изменения"
+      labels: ["*"]

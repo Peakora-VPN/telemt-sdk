@@ -21,6 +21,17 @@
   <a href="https://github.com/Peakora-VPN/telemt-sdk/issues">Сообщить об ошибке</a>
 </p>
 
+<p align="center"><strong>🤝 Спонсор проекта — Peakora VPN</strong></p>
+<p align="center">
+  <a href="https://peakora.network/">
+    <img src="https://peakora.network/social-preview.png" width="600" alt="Peakora VPN — интернет в вашем ритме">
+  </a>
+</p>
+<p align="center">
+  Защищённый доступ в интернет и к AI-сервисам с подключением через Telegram.<br>
+  <a href="https://peakora.network/">Подробнее о Peakora →</a>
+</p>
+
 Управляйте пользователями прокси, квотами, конфигурацией, диагностикой и WEB-сессиями из Python.
 `TelemtClient` объединяет операции в ресурсные объекты, переиспользует HTTP-соединения
 и возвращает Pydantic-модели с конкретными аннотациями типов, включая вложенные данные.

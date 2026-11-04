@@ -7,10 +7,11 @@ import pytest
 from scripts.check_release import check_release
 
 
-def artifacts(directory, wheel_version, source_version):
+def artifacts(directory, wheel_version, source_version, extra_metadata=""):
     with ZipFile(directory / "package.whl", "w") as wheel:
         wheel.writestr(
-            "telemt_sdk.dist-info/METADATA", f"Name: telemt-sdk\nVersion: {wheel_version}\n"
+            "telemt_sdk.dist-info/METADATA",
+            f"Name: telemt-sdk\nVersion: {wheel_version}\n{extra_metadata}",
         )
     with tarfile.open(directory / "package.tar.gz", "w:gz") as source:
         content = f"Name: telemt-sdk\nVersion: {source_version}\n".encode()
