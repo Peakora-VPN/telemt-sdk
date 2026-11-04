@@ -1,0 +1,74 @@
+[build-system]
+requires = ["hatchling>=1.27", "hatch-vcs>=0.5"]
+build-backend = "hatchling.build"
+
+[project]
+name = "telemt-sdk"
+dynamic = ["version"]
+description = "Typed asynchronous Python SDK for the Telemt Control API"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.13"
+dependencies = ["httpx>=0.28.1,<1", "pydantic>=2.12,<3"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Framework :: AsyncIO",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+  "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/Peakora-VPN/telemt-sdk"
+Issues = "https://github.com/Peakora-VPN/telemt-sdk/issues"
+Documentation = "https://github.com/Peakora-VPN/telemt-sdk#readme"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19",
+    "pytest>=8.4",
+    "pytest-asyncio>=1.2",
+    "pytest-cov>=7",
+    "ruff>=0.14.4",
+]
+
+[tool.hatch.version]
+source = "vcs"
+tag-pattern = '^v(?P<version>\d+\.\d+\.\d+(?:(?:a|b|rc)\d+)?)$'
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/telemt"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "scripts", "docs", "pyproject.toml", "README.md", "README.en.md", "CONTRIBUTING.md", "LICENSE", "uv.lock", ".python-version"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "--strict-config --strict-markers"
+
+[tool.coverage.run]
+source = ["telemt"]
+branch = true
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.mypy]
+files = ["src/telemt", "scripts", "tests/typing"]
+python_version = "3.13"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_typed = true
+init_forbid_extra = true
