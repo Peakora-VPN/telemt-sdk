@@ -60,4 +60,8 @@ Explain the observed problem, the new behavior and the checks you ran. Note any 
 that requires callers to update. Contributions are provided under the repository's
 [MIT license](LICENSE).
 
+Use `feat:`, `fix:` or `perf:` commit titles for SDK changes. Mark incompatible changes
+with `!` or a `BREAKING CHANGE:` footer. Release highlights are generated automatically
+from these messages between tags, including changes committed without a pull request.
+
 Publishing setup is documented separately in [Maintaining](docs/maintaining.md).

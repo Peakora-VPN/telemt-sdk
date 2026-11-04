@@ -60,30 +60,42 @@ or reuse a published version for different contents. Publish a new version inste
 CI and PyPI badges in the README reflect the external services. Their status becomes
 available after the workflow has run and the first package release has been published.
 
-## Release presentation
+## Automatic release highlights
 
-Release notes describe only what changed in that release: new features, fixes and
-compatibility changes. Keep installation instructions, badges, supported-version tables,
-license details and general SDK descriptions in the README. Files are attached as assets.
+The workflow generates the release body from Git using `scripts/release_notes.py`.
+No release-specific Markdown file, manually written summary or external service is needed.
+The description contains up to five significant changes and a link to the full comparison.
+Installation instructions, package metadata tables and the general SDK description stay in
+README. Distribution files remain attached as release assets.
 
-The workflow uses GitHub's generated notes without a shared introductory template.
-Use these PR labels to organize changes; the first matching category wins:
+The generator reads the tagged commit, not the current checkout's uncommitted changes:
 
-| Label | Release section |
-| --- | --- |
-| `breaking-change` | Changes affecting compatibility |
-| `enhancement`, `feature` | New features |
-| `bug`, `fix` | Fixes |
-| Other / no label | Other changes |
-| `documentation`, `dependencies`, `tests`, `ci`, `chore` only | Omitted from the catch-all section |
-| `skip-changelog` | Excluded from generated notes |
+- A stable release compares with the highest earlier stable version reachable from its tag.
+  This includes changes introduced during that release's alpha, beta and RC cycle.
+- A prerelease compares with the highest earlier reachable version, including prereleases.
+- The first release uses all history up to its tag.
+- Only commits touching `src/telemt`, `pyproject.toml` or `uv.lock` are considered.
+- `feat`, `fix` and `perf` commit subjects supply the highlights. `!` or a
+  `BREAKING CHANGE:` / `BREAKING-CHANGE:` footer includes a breaking change of any type.
+- Breaking changes come first, followed by the most recent relevant commits. Duplicate
+  titles and merge commits are omitted. Additional changes remain in the comparison link.
 
-Category titles are configured in `.github/release.yml` (separate from the publishing
-workflow in `.github/workflows/release.yml`). Write PR titles as concise user-facing changes.
-Label a dependency or documentation change `bug`, `feature` or `breaking-change` as well
-when it materially changes SDK behavior, so it remains in the appropriate section.
-Explain required migration steps in the linked PR.
+Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for meaningful
+SDK changes, for example `fix(users): preserve null when clearing a quota`.
+The commit title's language and wording are preserved; the generator does not invent or
+translate a description. Unstructured commits and maintenance-only changes are available
+through the full comparison rather than presented as highlights. If no relevant changes
+are found, the release body contains only that link.
 
-GitHub categorizes merged PRs; direct commits are accessible through the full changelog.
-Existing releases are not overwritten on workflow reruns. Prereleases retain GitHub's
-prerelease marker and are not marked Latest.
+Preview the exact automatically generated text for an existing tag:
+
+```bash
+uv run --no-project python -m scripts.release_notes \
+  --tag v1.0.0 --repository Peakora-VPN/telemt-sdk \
+  --output release-notes.md
+```
+
+This command reads local Git history and writes Markdown; it does not publish anything.
+Full history and tags are required (`fetch-depth: 0` in CI). Release checks still verify
+artifact versions before publishing. Existing releases are not overwritten on workflow
+reruns. Prereleases retain GitHub's prerelease marker and are not marked Latest.
