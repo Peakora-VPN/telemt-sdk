@@ -1,6 +1,6 @@
 # Contributing
 
-Use a separate branch for changes. For a bug report, include a minimal reproduction,
+For a bug report, include a minimal reproduction,
 the Python/SDK/Telemt versions and the relevant API error code. Remove secrets and
 private configuration before opening an issue.
 
@@ -15,7 +15,6 @@ uv python install 3.13 3.14 3.15
 uv sync --locked
 ```
 
-If an older uv installation does not recognize a Python version, update uv first.
 Dependencies belong in `pyproject.toml`; commit `uv.lock` when changing them.
 
 ## Checks
@@ -38,9 +37,9 @@ all resource routes, recorded real-server responses and response contracts extra
 Telemt's Rust types. Optional tests against a disposable server are described in
 [Testing against Telemt](docs/testing.md).
 
-CI runs Ruff and mypy, then tests on Python 3.13, 3.14 and 3.15 under Linux and Windows, and builds
-the wheel and source distribution. Do not remove a supported interpreter from the matrix
-to make a failing check pass.
+CI runs on pull requests and release tags (`v*`), including new commits to open pull requests.
+It runs Ruff and mypy, then tests on Python 3.13, 3.14 and 3.15 under Linux and Windows, and builds
+the wheel and source distribution.
 
 ## Changing the API
 
@@ -50,8 +49,7 @@ reference together. Preserve the difference between an omitted PATCH field and e
 JSON `null`. Keep configuration revisions attached to individual responses.
 
 When updating compatibility fixtures, record the upstream commit and how the responses
-were obtained. Add a focused regression test for a behavioral fix; route existence alone
-does not prove the result is decoded correctly. Include a consumer type assertion when
+were obtained. Add a regression test for behavioral fixes. Include a consumer type assertion when
 changing a public return type.
 
 ## Pull requests
@@ -61,7 +59,4 @@ that requires callers to update. Contributions are provided under the repository
 [MIT license](LICENSE).
 
 Use `feat:`, `fix:` or `perf:` commit titles for SDK changes. Mark incompatible changes
-with `!` or a `BREAKING CHANGE:` footer. Release highlights are generated automatically
-from these messages between tags, including changes committed without a pull request.
-
-Publishing setup is documented separately in [Maintaining](docs/maintaining.md).
+with `!` or a `BREAKING CHANGE:` footer. These messages appear in release highlights.

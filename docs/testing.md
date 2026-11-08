@@ -11,9 +11,8 @@ The default `uv run pytest` command needs no server or network access. It includ
 The source inventory and recorded responses in `tests/fixtures` were checked against
 Telemt **3.5.16**, commit
 [`84e5b827a6619fb2e09ad3d09f253cdffe04bc2f`](https://github.com/telemt/telemt/tree/84e5b827a6619fb2e09ad3d09f253cdffe04bc2f).
-This is fixture provenance, not a claim that all server configurations or versions were tested.
 
-`source-contracts.json` records 138 serialized model shapes and 1001 fields, including
+`source-contracts.json` records serialized model shapes and fields, including
 flattened Rust structs, serde aliases, nullable fields and `skip_serializing_if` behavior.
 `live-responses.json` contains responses from the isolated configuration below. Secrets in
 these fixtures belong only to disposable test users. No production credentials are used.
@@ -60,7 +59,7 @@ uv run pytest tests/integration -v
 
 On Windows, use the same image, mount and environment variables from PowerShell; set
 `$env:TELEMT_TEST_URL` and `$env:TELEMT_TEST_WEB_URL` to the published localhost addresses.
-Remove only the container created for this test when finished. The configuration disables
+The configuration disables
 middle-proxy mode and STUN; active Telegram traffic, ME writer behavior under load and
 external network failover are outside this integration scenario.
 

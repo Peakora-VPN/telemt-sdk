@@ -21,17 +21,6 @@
   <a href="https://github.com/Peakora-VPN/telemt-sdk/issues">Сообщить об ошибке</a>
 </p>
 
-<p align="center"><strong>🤝 Спонсор проекта — Peakora VPN</strong></p>
-<p align="center">
-  <a href="https://peakora.network/">
-    <img src="https://peakora.network/social-preview.png" width="600" alt="Peakora VPN — интернет в вашем ритме">
-  </a>
-</p>
-<p align="center">
-  Защищённый доступ в интернет и к AI-сервисам с подключением через Telegram.<br>
-  <a href="https://peakora.network/">Подробнее о Peakora →</a>
-</p>
-
 Управляйте пользователями прокси, квотами, конфигурацией, диагностикой и WEB-сессиями из Python.
 `TelemtClient` объединяет операции в ресурсные объекты, переиспользует HTTP-соединения
 и возвращает Pydantic-модели с конкретными аннотациями типов, включая вложенные данные.
@@ -49,7 +38,7 @@ SDK работает с HTTP API управления [Telemt](https://github.co
 
 Требуется Python **3.13, 3.14 или 3.15**. Имя пакета — `telemt-sdk`, имя импорта — `telemt`.
 
-После появления релиза в [PyPI](https://pypi.org/project/telemt-sdk/):
+Установка из [PyPI](https://pypi.org/project/telemt-sdk/):
 
 ```bash
 uv add telemt-sdk
@@ -61,14 +50,12 @@ uv add telemt-sdk
 python -m pip install telemt-sdk
 ```
 
-До первого релиза можно работать из клонированного репозитория: выполните `uv sync --locked`
-в его каталоге. Зависимости SDK — [HTTPX](https://www.python-httpx.org/)
-и [Pydantic](https://docs.pydantic.dev/latest/).
+Настройка окружения для разработки описана в [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Быстрый старт
 
 Включите Control API в конфигурации Telemt и задайте `TELEMT_AUTH_HEADER` равным точному
-значению `server.api.auth_header`. Этот пример читает состояние сервера:
+значению `server.api.auth_header`:
 
 ```python
 import asyncio
@@ -97,6 +84,9 @@ SDK передаёт `auth_header` в заголовке `Authorization` без 
 Если на сервере настроено значение `Bearer ...`, передавайте строку целиком.
 Если авторизация не настроена, аргумент можно опустить. Используйте адрес слушателя
 Control API, а не порт MTProto или WEB ingress.
+
+Следующие примеры выполняются внутри `async with TelemtClient(...) as client`
+в асинхронной функции, как в быстром старте.
 
 ## Настройка клиента
 
@@ -128,7 +118,7 @@ import httpx
 async with httpx.AsyncClient(limits=httpx.Limits(max_connections=20)) as http:
     async with TelemtClient(
         "https://proxy.example.com",
-        auth_header=auth_header,
+        auth_header=os.environ["TELEMT_AUTH_HEADER"],
         timeout=httpx.Timeout(30.0, connect=5.0),
         http_client=http,
     ) as client:
@@ -191,6 +181,23 @@ await client.users.enable("alice")
 неизвестные поля и недопустимые значения. Проверки, зависящие от состояния сервера,
 например существование пользователя, выполняет Telemt и возвращает соответствующую ошибку API.
 
+### Проверка расхода квоты
+
+`used_bytes` и `data_quota_bytes` возвращаются в байтах. Например, расход пользователей
+с месячной квотой можно вывести в гигабайтах:
+
+```python
+quotas = await client.stats.quota()
+for quota in quotas.data.users:
+    if quota.quota_period == "monthly":
+        print(
+            quota.username,
+            f"{quota.used_bytes / 1_000_000_000:.2f} / "
+            f"{quota.data_quota_bytes / 1_000_000_000:.2f} GB",
+            quota.quota_next_reset_epoch_secs,
+        )
+```
+
 ## Ответы и ревизии
 
 Каждый метод возвращает `APIResponse[T]`:
@@ -228,6 +235,8 @@ await client.users.update(
 ## Конфигурация и перезагрузка
 
 ```python
+import asyncio
+
 from telemt.models import PatchConfigRequest, ReloadRequest
 
 current = await client.config.get()
@@ -237,8 +246,20 @@ changed = await client.config.update(
     reload=ReloadRequest(mode="drain", timeout_secs=30, failure_policy="rollback"),
 )
 if changed.data.reload is not None:
-    progress = await client.system.reload_status(changed.data.reload.reload_id)
+    async with asyncio.timeout(60):
+        while True:
+            progress = await client.system.reload_status(changed.data.reload.reload_id)
+            if progress.data.state in {"succeeded", "rolled_back", "failed"}:
+                break
+            await asyncio.sleep(1)
+
     print(progress.data.state)
+    for warning in progress.data.warnings:
+        print(warning)
+    if progress.data.deferred_process_fields:
+        print("Restart required:", progress.data.deferred_process_fields)
+    if progress.data.state != "succeeded":
+        raise RuntimeError(progress.data.error or progress.data.state)
 ```
 
 Для изменения доступны `general`, `timeouts`, `censorship`, `upstreams`, `dc_overrides`,
@@ -271,6 +292,23 @@ if status.data.runtime is not None:
         print(progress.data.state)
 ```
 
+Для просмотра всех страниц сессий пользователя:
+
+```python
+from telemt.models import SessionQuery
+
+cursor: str | None = None
+while True:
+    page = await client.runtime.web.sessions(
+        SessionQuery(user="alice", limit=100, cursor=cursor)
+    )
+    for session in page.data.sessions:
+        print(session.session_ref)
+    cursor = page.data.next_cursor
+    if cursor is None:
+        break
+```
+
 Страница сессий содержит до 200 записей. Для следующей страницы передайте
 `SessionQuery(cursor=page.data.next_cursor, ...)` с теми же фильтрами. Завершайте обход,
 когда `next_cursor` равен `None`. Поля `scan_truncated`, `partial_sessions` и `partial`
@@ -293,9 +331,10 @@ if status.data.runtime is not None:
 from telemt import APIError, ConflictError, TransportError
 
 try:
-    await client.users.disable("alice", revision=known_revision)
+    current = await client.users.get("alice")
+    disabled = await client.users.disable("alice", revision=current.revision)
 except ConflictError as error:
-    print(error.code, error.request_id)
+    print("Conflict:", error.code, error.request_id)
 except APIError as error:
     print(error.status_code, error.code, error.message)
 except TransportError:
@@ -327,11 +366,10 @@ except TransportError:
 
 SDK следует [проекту Telemt](https://github.com/telemt/telemt) и его
 [Control API](https://github.com/telemt/telemt/blob/main/docs/Architecture/API/API.md).
-Модели сверяются со спецификацией API и типами сериализации в Rust-коде сервера.
 Клиент охватывает 48 основных операций Control API. HTML-страница `/web-status`
 и транспортные WEB-эндпоинты находятся за пределами этого API-клиента.
 
-Python 3.13, 3.14 и 3.15 входят в обязательную матрицу CI под Linux и Windows. Необязательные
+Поддерживаются Python 3.13, 3.14 и 3.15 под Linux и Windows. Необязательные
 возможности Telemt могут возвращать данные об отключённой или недоступной функции:
 проверяйте `enabled`, `reason`, `data` и `partial`, когда они присутствуют. Сохранение
 новых полей помогает при расширении ответов сервера, но не означает гарантированную
@@ -349,6 +387,17 @@ Python 3.13, 3.14 и 3.15 входят в обязательную матриц�
 
 Настройка окружения uv, линтер, проверка типов и тесты описаны в
 [CONTRIBUTING.md](https://github.com/Peakora-VPN/telemt-sdk/blob/main/CONTRIBUTING.md).
+
+<p align="center"><strong>🤝 Спонсор проекта — Peakora VPN</strong></p>
+<p align="center">
+  <a href="https://peakora.network/">
+    <img src="https://peakora.network/social-preview.png" width="600" alt="Peakora VPN — интернет в вашем ритме">
+  </a>
+</p>
+<p align="center">
+  Защищённый доступ в интернет и к AI-сервисам с подключением через Telegram.<br>
+  <a href="https://peakora.network/">Подробнее о Peakora →</a>
+</p>
 
 ## Лицензия
 
