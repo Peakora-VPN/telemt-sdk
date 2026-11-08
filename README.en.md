@@ -127,6 +127,31 @@ SDK parameters and explicit authorization take precedence
 over HTTPX defaults. Redirects and automatic retries are disabled; a timed-out mutation
 may already have reached the server.
 
+### HTTP hooks
+
+Pass `ClientHook` instances through `hooks` and override the callbacks you need:
+
+```python
+import httpx
+from telemt import ClientHook, TelemtClient
+
+
+class LoggingHook(ClientHook):
+    async def on_request(self, request: httpx.Request) -> None:
+        print(request.method, request.url.path)
+
+    async def on_response(self, response: httpx.Response) -> None:
+        print(response.status_code)
+
+
+async with TelemtClient(
+    "http://127.0.0.1:9091",
+    auth_header=os.environ["TELEMT_AUTH_HEADER"],
+    hooks=[LoggingHook()],
+) as client:
+    await client.health.get()
+```
+
 ## Users and quotas
 
 ```python
@@ -243,13 +268,9 @@ changed = await client.config.update(
     reload=ReloadRequest(mode="drain", timeout_secs=30, failure_policy="rollback"),
 )
 if changed.data.reload is not None:
-    async with asyncio.timeout(60):
-        while True:
-            progress = await client.system.reload_status(changed.data.reload.reload_id)
-            if progress.data.state in {"succeeded", "rolled_back", "failed"}:
-                break
-            await asyncio.sleep(1)
-
+    progress = await client.system.wait_reload(
+        changed.data.reload.reload_id, timeout=60, poll_interval=1
+    )
     print(progress.data.state)
     for warning in progress.data.warnings:
         print(warning)
@@ -284,7 +305,7 @@ if status.data.runtime is not None:
                 selector=RefsSelector(session_refs=[row.session_ref for row in page.data.sessions]),
             )
         )
-        progress = await client.runtime.web.operation(accepted.data.operation_id)
+        progress = await client.runtime.web.wait_operation(accepted.data.operation_id, timeout=60)
         print(progress.data.state)
 ```
 
@@ -293,16 +314,8 @@ To list every page of sessions for a user:
 ```python
 from telemt.models import SessionQuery
 
-cursor: str | None = None
-while True:
-    page = await client.runtime.web.sessions(
-        SessionQuery(user="alice", limit=100, cursor=cursor)
-    )
-    for session in page.data.sessions:
-        print(session.session_ref)
-    cursor = page.data.next_cursor
-    if cursor is None:
-        break
+async for session in client.runtime.web.iter_sessions(SessionQuery(user="alice", limit=100)):
+    print(session.session_ref)
 ```
 
 Session pages contain up to 200 rows. Pass `SessionQuery(cursor=page.data.next_cursor, ...)`
