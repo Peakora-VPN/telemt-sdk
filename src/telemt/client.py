@@ -1,6 +1,6 @@
 """An asynchronous, connection-pooling Telemt Control API client."""
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from types import TracebackType
 from typing import Self
 
@@ -17,6 +17,7 @@ from .exceptions import (
     RequestTimeoutError,
     TransportError,
 )
+from .hooks import ClientHook
 from .models.base import APIResponse, ErrorEnvelope, RequestModel
 from .models.requests import PatchConfigRequest, PatchUserRequest
 from .resources import (
@@ -45,6 +46,7 @@ class TelemtClient:
         auth_header: str | None = None,
         timeout: float | httpx.Timeout = 30.0,
         http_client: httpx.AsyncClient | None = None,
+        hooks: Sequence[ClientHook] = (),
     ) -> None:
         url = httpx.URL(base_url)
         if url.scheme not in {"http", "https"} or not url.host:
@@ -58,6 +60,7 @@ class TelemtClient:
         self._headers = {"Accept": "application/json"}
         if auth_header is not None:
             self._headers["Authorization"] = auth_header
+        self._hooks = tuple(hooks)
         self._timeout = timeout
         self._owns_http_client = http_client is None
         self._http = http_client if http_client is not None else httpx.AsyncClient()
@@ -115,22 +118,27 @@ class TelemtClient:
             payload = body.model_dump(
                 mode="json", exclude_unset=is_patch, exclude_none=not is_patch, by_alias=True
             )
+        url = self._base_url.join(path).copy_with(params=params)
+        request = self._http.build_request(
+            method,
+            url,
+            headers=headers,
+            json=payload,
+            timeout=self._timeout,
+        )
+        # Client defaults must not add query fields or replace exact Telemt authorization.
+        request.url = url
+        for hook in self._hooks:
+            await hook.on_request(request)
         try:
-            url = self._base_url.join(path).copy_with(params=params)
-            request = self._http.build_request(
-                method,
-                url,
-                headers=headers,
-                json=payload,
-                timeout=self._timeout,
-            )
-            # Client defaults must not add query fields or replace exact Telemt authorization.
-            request.url = url
             response = await self._http.send(request, auth=None, follow_redirects=False)
         except httpx.TimeoutException as exc:
             raise RequestTimeoutError("Telemt request timed out") from exc
         except httpx.RequestError as exc:
             raise TransportError("Telemt request failed") from exc
+
+        for hook in self._hooks:
+            await hook.on_response(response)
 
         try:
             envelope = response.json()

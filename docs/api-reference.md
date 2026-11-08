@@ -168,3 +168,33 @@ Model definitions, including all nested fields, are in
 [`responses.py`](../src/telemt/models/responses.py),
 [`web.py`](../src/telemt/models/web.py) and
 [`operations.py`](../src/telemt/models/operations.py).
+
+## Iteration and waiting
+
+- `system.wait_reload(reload_id, *, timeout=60, poll_interval=1)` returns
+  `APIResponse[ReloadStatus]` on `succeeded`, `rolled_back` or `failed`.
+- `runtime.web.wait_operation(operation_id, *, timeout=60, poll_interval=1)` returns
+  `APIResponse[ControlOperationStatus]` on `completed` or `failed`.
+- `runtime.web.iter_sessions(query=None)` yields `SessionRow` across pages, preserving
+  filters and leaving the supplied query unchanged. Use `sessions()` when you need
+  snapshot metadata such as `partial` and `scan_truncated`. A repeated cursor raises
+  `ValueError`; iteration does not provide a consistent snapshot across requests.
+
+Wait timeouts and polling intervals must be finite positive seconds. The overall deadline
+includes HTTP requests and raises built-in `TimeoutError`. Cancellation and API errors
+propagate. A failed operation is returned as data; inspect its state and error details.
+These helpers only read status; they do not retry mutations or cancel server operations.
+
+## Client hooks
+
+Import `ClientHook` from `telemt`, override `async on_request(request: httpx.Request)`
+and/or `async on_response(response: httpx.Response)`, and pass instances using
+`TelemtClient(..., hooks=[hook])`. Both methods return `None` and default to no-ops.
+The client copies the hook sequence at construction and calls hooks in order.
+Request hooks run before HTTPX sends the request. Response hooks run after the body
+has been read, before API decoding, including HTTP error responses.
+No response callback runs on transport failure. Callback errors and cancellation propagate;
+a request callback error prevents sending, while a response callback error occurs after
+any server-side mutation. Instances may serve concurrent requests: store per-request state
+in `request.extensions`, not shared instance attributes.
+Existing HTTPX event hooks remain unchanged; SDK hooks apply only to this SDK client.

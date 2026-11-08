@@ -11,7 +11,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from telemt import ConflictError, TelemtClient
+from telemt import ClientHook, ConflictError, TelemtClient
 from telemt import models as m
 
 from ..test_resources import READ_ROUTES, WRITE_ROUTES, resolve
@@ -36,9 +36,23 @@ async def test_all_operations_against_telemt():
             }
         )
 
+    hook_requests = []
+    hook_responses = []
+
+    class AuditHook(ClientHook):
+        async def on_request(self, request):
+            hook_requests.append(request)
+
+        async def on_response(self, response):
+            assert response.content
+            hook_responses.append(response)
+
     async with httpx.AsyncClient(event_hooks={"response": [record]}) as http:
         async with TelemtClient(
-            os.environ["TELEMT_TEST_URL"], auth_header="sdk-audit-test-auth", http_client=http
+            os.environ["TELEMT_TEST_URL"],
+            auth_header="sdk-audit-test-auth",
+            http_client=http,
+            hooks=[AuditHook()],
         ) as client:
 
             async def call(name, *args, **kwargs):
@@ -124,6 +138,13 @@ async def test_all_operations_against_telemt():
             instance = status.runtime.runtime_instance
             page = (await call("runtime.web.sessions", m.SessionQuery(user="audit_admin"))).data
             assert page.sessions
+            rows = [
+                row
+                async for row in client.runtime.web.iter_sessions(
+                    m.SessionQuery(user="audit_admin", limit=1)
+                )
+            ]
+            assert ref_set(rows) == ref_set(page.sessions)
             ref = page.sessions[-1].session_ref
             assert isinstance((await call("runtime.web.session", ref)).data, m.SessionRow)
             operation = await call(
@@ -138,6 +159,9 @@ async def test_all_operations_against_telemt():
                     if progress.data.state in {"completed", "failed"}:
                         break
                     await asyncio.sleep(0.05)
+            progress = await client.runtime.web.wait_operation(
+                operation.data.operation_id, timeout=10
+            )
             assert progress.data.state == "completed"
             assert progress.data.close_signalled == 1
             async with asyncio.timeout(10):
@@ -174,8 +198,11 @@ async def test_all_operations_against_telemt():
                     if result.data.state in {"succeeded", "failed", "rolled_back"}:
                         break
                     await asyncio.sleep(0.1)
+            result = await client.system.wait_reload(reload.data.reload_id, timeout=20)
             assert result.data.state == "succeeded", result.data
 
+    assert len(hook_requests) == len(hook_responses)
+    assert any(response.status_code == 409 for response in hook_responses)
     successful = [r for r in records if r["body"]["ok"]]
     expected = {r[0] for r in READ_ROUTES + WRITE_ROUTES}
     assert {r["method"] for r in successful} == expected
@@ -194,3 +221,7 @@ async def test_all_operations_against_telemt():
             json.dumps(list(unique.values()), indent=2) + "\n",
             encoding="utf-8",
         )
+
+
+def ref_set(rows):
+    return {row.session_ref for row in rows}

@@ -2,7 +2,9 @@
 
 from typing import assert_type
 
-from telemt import TelemtClient
+import httpx
+
+from telemt import ClientHook, TelemtClient
 from telemt import models as m
 
 
@@ -41,3 +43,15 @@ async def consumer(client: TelemtClient) -> None:
     await client.users.get(123)  # type: ignore[arg-type]
     await client.users.create(m.PatchUserRequest())  # type: ignore[arg-type]
     m.CreateUserRequest(username="alice", enabled="false")  # type: ignore[arg-type]
+
+
+class ConsumerHook(ClientHook):
+    async def on_request(self, request: httpx.Request) -> None:
+        assert_type(request, httpx.Request)
+
+    async def on_response(self, response: httpx.Response) -> None:
+        assert_type(response, httpx.Response)
+
+
+def hooked_client() -> TelemtClient:
+    return TelemtClient("http://localhost", hooks=[ConsumerHook()])

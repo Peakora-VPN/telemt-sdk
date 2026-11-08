@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
+import math
+from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
 from pydantic import TypeAdapter
@@ -60,6 +63,22 @@ class SystemResource(Resource):
         return await self._client._request(
             "GET", f"system/reload/{reload_id}", m.APIResponse[m.ReloadStatus]
         )
+
+    async def wait_reload(
+        self,
+        reload_id: int,
+        *,
+        timeout: float = 60,  # noqa: ASYNC109
+        poll_interval: float = 1,
+    ) -> m.APIResponse[m.ReloadStatus]:
+        """Wait for a terminal status, including failure; raise TimeoutError on deadline."""
+        _poll_limits(timeout, poll_interval)
+        async with asyncio.timeout(timeout):
+            while True:
+                result = await self.reload_status(reload_id)
+                if result.data.state in {"succeeded", "rolled_back", "failed"}:
+                    return result
+                await asyncio.sleep(poll_interval)
 
     async def info(self) -> m.APIResponse[m.SystemInfoData]:
         """GET /v1/system/info."""
@@ -331,6 +350,24 @@ class WebResource(Resource):
             params=query.model_dump(exclude_none=True) if query is not None else None,
         )
 
+    async def iter_sessions(
+        self, query: m.SessionQuery | None = None
+    ) -> AsyncIterator[m.SessionRow]:
+        """Yield sessions across pages; use sessions() to inspect snapshot metadata."""
+        query = m.SessionQuery.model_validate(query or m.SessionQuery()).model_copy(deep=True)
+        seen = {query.cursor} if query.cursor is not None else set()
+        while True:
+            page = await self.sessions(query)
+            for session in page.data.sessions:
+                yield session
+            cursor = page.data.next_cursor
+            if cursor is None:
+                return
+            if cursor in seen:
+                raise ValueError("server returned a repeated session cursor")
+            seen.add(cursor)
+            query = m.SessionQuery.model_validate(query.model_dump() | {"cursor": cursor})
+
     async def session(self, session_ref: str) -> m.APIResponse[m.GoneSessionData | m.SessionRow]:
         return await self._client._request(
             "GET",
@@ -355,6 +392,22 @@ class WebResource(Resource):
             f"runtime/web/operations/{_OPERATION_REF.validate_python(operation_id, strict=True)}",
             m.APIResponse[m.ControlOperationStatus],
         )
+
+    async def wait_operation(
+        self,
+        operation_id: str,
+        *,
+        timeout: float = 60,  # noqa: ASYNC109
+        poll_interval: float = 1,
+    ) -> m.APIResponse[m.ControlOperationStatus]:
+        """Wait for completed or failed; cancellation and API errors propagate."""
+        _poll_limits(timeout, poll_interval)
+        async with asyncio.timeout(timeout):
+            while True:
+                result = await self.operation(operation_id)
+                if result.data.state in {"completed", "failed"}:
+                    return result
+                await asyncio.sleep(poll_interval)
 
     async def clear_debug(
         self, request: m.RuntimeInstanceRequest
@@ -414,3 +467,9 @@ def _limit(value: int | None) -> dict[str, int] | None:
     if type(value) is not int or not 1 <= value <= 1000:
         raise ValueError("limit must be an integer between 1 and 1000")
     return {"limit": value}
+
+
+def _poll_limits(timeout: float, poll_interval: float) -> None:
+    for name, value in (("timeout", timeout), ("poll_interval", poll_interval)):
+        if isinstance(value, bool) or not math.isfinite(value) or value <= 0:
+            raise ValueError(f"{name} must be finite and positive")

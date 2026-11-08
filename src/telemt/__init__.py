@@ -15,6 +15,7 @@ from .exceptions import (
     TelemtError,
     TransportError,
 )
+from .hooks import ClientHook
 
 __version__ = version("telemt-sdk")
 
@@ -22,6 +23,7 @@ __all__ = [
     "APIError",
     "AuthenticationError",
     "ConflictError",
+    "ClientHook",
     "InvalidResponseError",
     "NotFoundError",
     "PermissionDeniedError",
