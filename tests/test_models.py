@@ -261,6 +261,145 @@ def test_field_issue_dto():
         m.FieldIssue(path="p", code="c")
 
 
+def _inherited_limit(*, value=None, configured_override=None, global_value=0, origin="unlimited"):
+    return {
+        "value": value,
+        "configured_override": configured_override,
+        "global_value": global_value,
+        "origin": origin,
+    }
+
+
+def _limit_snapshot(max_tcp_conns=None, max_unique_ips=None):
+    return {
+        "max_tcp_conns": max_tcp_conns
+        or _inherited_limit(value=4, configured_override=4, origin="user_override"),
+        "max_unique_ips": max_unique_ips or _inherited_limit(),
+    }
+
+
+def _user_payload(**overrides):
+    payload = {
+        "username": "alice",
+        "enabled": True,
+        "in_runtime": True,
+        "limits": {
+            "desired": _limit_snapshot(),
+            "effective": _limit_snapshot(),
+            "effective_scope": "request_generation_snapshot",
+            "subsystem_convergence": "unknown",
+        },
+        "source_deny": ["203.0.113.0/24", "2001:db8:abcd::/48"],
+        "source_deny_status": {
+            "effective": ["203.0.113.0/24", "2001:db8:abcd::/48"],
+            "runtime_reload_required": False,
+            "apply_mode": "generation_reload",
+            "reload_endpoint": "POST /v1/system/reload",
+            "effective_scope": "request_generation_snapshot",
+        },
+        "current_connections": 0,
+        "active_unique_ips": 0,
+        "active_unique_ips_list": [],
+        "recent_unique_ips": 0,
+        "recent_unique_ips_list": [],
+        "total_octets": 0,
+        "links": {"classic": [], "secure": [], "tls": [], "tls_domains": []},
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_user_info_exposes_limit_state_and_source_deny_status():
+    user = m.UserInfo(**_user_payload())
+    assert user.limits.desired.max_tcp_conns.origin == "user_override"
+    assert user.limits.desired.max_tcp_conns.value == 4
+    assert user.limits.desired.max_unique_ips.origin == "unlimited"
+    assert user.limits.effective is not None
+    assert user.limits.effective.max_unique_ips.value is None
+    assert user.limits.effective_scope == "request_generation_snapshot"
+    assert user.limits.subsystem_convergence == "unknown"
+    assert user.source_deny == ["203.0.113.0/24", "2001:db8:abcd::/48"]
+    status = user.source_deny_status
+    assert status.effective == ["203.0.113.0/24", "2001:db8:abcd::/48"]
+    assert status.runtime_reload_required is False
+    assert status.apply_mode == "generation_reload"
+    assert status.reload_endpoint == "POST /v1/system/reload"
+    assert status.effective_scope == "request_generation_snapshot"
+
+
+def test_user_limit_state_and_source_deny_state_nullability():
+    # The desired snapshot is always present; the effective one is nullable.
+    state = m.UserLimitState(
+        desired=_limit_snapshot(),
+        effective_scope="active_config_snapshot",
+        subsystem_convergence="unknown",
+    )
+    assert state.effective is None
+    with pytest.raises(ValidationError):
+        m.UserLimitState()
+    # Rust always serializes null for unset optionals on these DTOs.
+    limit = m.InheritedLimit(global_value=8, origin="global_default")
+    assert limit.value is None
+    assert limit.configured_override is None
+    with pytest.raises(ValidationError):
+        m.InheritedLimit()
+    deny = m.SourceDenyState(
+        apply_mode="generation_reload",
+        reload_endpoint="POST /v1/system/reload",
+        effective_scope="request_generation_snapshot",
+    )
+    assert deny.effective is None
+    assert deny.runtime_reload_required is None
+    with pytest.raises(ValidationError):
+        m.SourceDenyState()
+
+
+def test_patch_config_response_exposes_changed_paths_and_normalization_effects():
+    response = m.PatchConfigResponse(
+        revision="a" * 64,
+        restart_required=True,
+        runtime_reload_required=True,
+        process_restart_required=False,
+        deferred_process_fields=[],
+        changed=["censorship"],
+        changed_paths=["censorship.tls_domain"],
+        normalization_effects=[
+            {"path": "upstreams[0].bindtodevice", "code": "alias_canonicalized"}
+        ],
+    )
+    assert response.changed_paths == ["censorship.tls_domain"]
+    effect = response.normalization_effects[0]
+    assert effect.path == "upstreams[0].bindtodevice"
+    assert effect.code == "alias_canonicalized"
+    assert response.reload is None
+    with pytest.raises(ValidationError):
+        m.PatchConfigResponse(
+            revision="a" * 64,
+            restart_required=False,
+            runtime_reload_required=False,
+            process_restart_required=False,
+            deferred_process_fields=[],
+            changed=["censorship"],
+        )
+
+
+def test_config_data_includes_network_dns_overrides():
+    data = m.ConfigData(
+        general={},
+        timeouts={},
+        censorship={},
+        upstreams=[],
+        dc_overrides={},
+        web={},
+        network={"dns_overrides": ["upstream.example:443:192.0.2.10"]},
+    )
+    assert data.network == {"dns_overrides": ["upstream.example:443:192.0.2.10"]}
+    without = m.ConfigData(
+        general={}, timeouts={}, censorship={}, upstreams=[], dc_overrides={}, web={}
+    )
+    assert without.network is None
+
+
 def test_all_public_models_have_resolved_schema():
     for name in m.__all__:
         model = getattr(m, name)

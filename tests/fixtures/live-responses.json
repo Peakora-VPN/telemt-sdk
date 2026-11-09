@@ -17,6 +17,46 @@
           "rate_limit_up_bps": null,
           "rate_limit_down_bps": null,
           "max_unique_ips": null,
+          "limits": {
+            "desired": {
+              "max_tcp_conns": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              },
+              "max_unique_ips": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              }
+            },
+            "effective": {
+              "max_tcp_conns": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              },
+              "max_unique_ips": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              }
+            },
+            "effective_scope": "active_config_snapshot",
+            "subsystem_convergence": "unknown"
+          },
+          "source_deny": [],
+          "source_deny_status": {
+            "effective": [],
+            "runtime_reload_required": false,
+            "apply_mode": "generation_reload",
+            "reload_endpoint": "POST /v1/system/reload",
+            "effective_scope": "request_generation_snapshot"
+          },
           "current_connections": 0,
           "active_unique_ips": 0,
           "active_unique_ips_list": [],
@@ -514,6 +554,46 @@
           "rate_limit_up_bps": null,
           "rate_limit_down_bps": null,
           "max_unique_ips": null,
+          "limits": {
+            "desired": {
+              "max_tcp_conns": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              },
+              "max_unique_ips": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              }
+            },
+            "effective": {
+              "max_tcp_conns": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              },
+              "max_unique_ips": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              }
+            },
+            "effective_scope": "active_config_snapshot",
+            "subsystem_convergence": "unknown"
+          },
+          "source_deny": [],
+          "source_deny_status": {
+            "effective": [],
+            "runtime_reload_required": false,
+            "apply_mode": "generation_reload",
+            "reload_endpoint": "POST /v1/system/reload",
+            "effective_scope": "request_generation_snapshot"
+          },
           "current_connections": 0,
           "active_unique_ips": 0,
           "active_unique_ips_list": [],
@@ -3022,6 +3102,9 @@
               "public_addr": "203.0.113.10:443"
             }
           ]
+        },
+        "network": {
+          "dns_overrides": []
         }
       },
       "revision": "f5cc3c743418c3aff07888ac1b392c90cc263a7b15d0e9d4539d16c217b5f472"
@@ -3045,6 +3128,33 @@
           "rate_limit_up_bps": null,
           "rate_limit_down_bps": null,
           "max_unique_ips": null,
+          "limits": {
+            "desired": {
+              "max_tcp_conns": {
+                "value": 4,
+                "configured_override": 4,
+                "global_value": 0,
+                "origin": "user_override"
+              },
+              "max_unique_ips": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              }
+            },
+            "effective": null,
+            "effective_scope": "active_config_snapshot",
+            "subsystem_convergence": "unknown"
+          },
+          "source_deny": [],
+          "source_deny_status": {
+            "effective": [],
+            "runtime_reload_required": false,
+            "apply_mode": "generation_reload",
+            "reload_endpoint": "POST /v1/system/reload",
+            "effective_scope": "request_generation_snapshot"
+          },
           "current_connections": 0,
           "active_unique_ips": 0,
           "active_unique_ips_list": [],
@@ -3082,6 +3192,33 @@
         "rate_limit_up_bps": null,
         "rate_limit_down_bps": null,
         "max_unique_ips": null,
+        "limits": {
+          "desired": {
+            "max_tcp_conns": {
+              "value": 4,
+              "configured_override": 4,
+              "global_value": 0,
+              "origin": "user_override"
+            },
+            "max_unique_ips": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            }
+          },
+          "effective": null,
+          "effective_scope": "active_config_snapshot",
+          "subsystem_convergence": "unknown"
+        },
+        "source_deny": [],
+        "source_deny_status": {
+          "effective": [],
+          "runtime_reload_required": false,
+          "apply_mode": "generation_reload",
+          "reload_endpoint": "POST /v1/system/reload",
+          "effective_scope": "request_generation_snapshot"
+        },
         "current_connections": 0,
         "active_unique_ips": 0,
         "active_unique_ips_list": [],
@@ -3117,6 +3254,33 @@
         "rate_limit_up_bps": null,
         "rate_limit_down_bps": null,
         "max_unique_ips": null,
+        "limits": {
+          "desired": {
+            "max_tcp_conns": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            },
+            "max_unique_ips": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            }
+          },
+          "effective": null,
+          "effective_scope": "active_config_snapshot",
+          "subsystem_convergence": "unknown"
+        },
+        "source_deny": [],
+        "source_deny_status": {
+          "effective": [],
+          "runtime_reload_required": false,
+          "apply_mode": "generation_reload",
+          "reload_endpoint": "POST /v1/system/reload",
+          "effective_scope": "request_generation_snapshot"
+        },
         "current_connections": 0,
         "active_unique_ips": 0,
         "active_unique_ips_list": [],
@@ -3152,6 +3316,46 @@
         "rate_limit_up_bps": null,
         "rate_limit_down_bps": null,
         "max_unique_ips": null,
+        "limits": {
+          "desired": {
+            "max_tcp_conns": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            },
+            "max_unique_ips": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            }
+          },
+          "effective": {
+            "max_tcp_conns": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            },
+            "max_unique_ips": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            }
+          },
+          "effective_scope": "active_config_snapshot",
+          "subsystem_convergence": "unknown"
+        },
+        "source_deny": [],
+        "source_deny_status": {
+          "effective": [],
+          "runtime_reload_required": false,
+          "apply_mode": "generation_reload",
+          "reload_endpoint": "POST /v1/system/reload",
+          "effective_scope": "request_generation_snapshot"
+        },
         "current_connections": 0,
         "active_unique_ips": 0,
         "active_unique_ips_list": [],
@@ -3187,6 +3391,46 @@
         "rate_limit_up_bps": null,
         "rate_limit_down_bps": null,
         "max_unique_ips": null,
+        "limits": {
+          "desired": {
+            "max_tcp_conns": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            },
+            "max_unique_ips": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            }
+          },
+          "effective": {
+            "max_tcp_conns": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            },
+            "max_unique_ips": {
+              "value": null,
+              "configured_override": null,
+              "global_value": 0,
+              "origin": "unlimited"
+            }
+          },
+          "effective_scope": "active_config_snapshot",
+          "subsystem_convergence": "unknown"
+        },
+        "source_deny": [],
+        "source_deny_status": {
+          "effective": [],
+          "runtime_reload_required": false,
+          "apply_mode": "generation_reload",
+          "reload_endpoint": "POST /v1/system/reload",
+          "effective_scope": "request_generation_snapshot"
+        },
         "current_connections": 0,
         "active_unique_ips": 0,
         "active_unique_ips_list": [],
@@ -3223,6 +3467,46 @@
           "rate_limit_up_bps": null,
           "rate_limit_down_bps": null,
           "max_unique_ips": null,
+          "limits": {
+            "desired": {
+              "max_tcp_conns": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              },
+              "max_unique_ips": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              }
+            },
+            "effective": {
+              "max_tcp_conns": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              },
+              "max_unique_ips": {
+                "value": null,
+                "configured_override": null,
+                "global_value": 0,
+                "origin": "unlimited"
+              }
+            },
+            "effective_scope": "active_config_snapshot",
+            "subsystem_convergence": "unknown"
+          },
+          "source_deny": [],
+          "source_deny_status": {
+            "effective": [],
+            "runtime_reload_required": false,
+            "apply_mode": "generation_reload",
+            "reload_endpoint": "POST /v1/system/reload",
+            "effective_scope": "request_generation_snapshot"
+          },
           "current_connections": 0,
           "active_unique_ips": 0,
           "active_unique_ips_list": [],
@@ -3472,7 +3756,11 @@
         "deferred_process_fields": [],
         "changed": [
           "censorship"
-        ]
+        ],
+        "changed_paths": [
+          "censorship.tls_domain"
+        ],
+        "normalization_effects": []
       },
       "revision": "c3ffaaec10d0d15b055f8ce9a2ba6c995547f14be570637524fc96a6c6c6294c"
     }

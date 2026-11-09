@@ -6,10 +6,30 @@ from telemt import TelemtClient
 
 @pytest.fixture
 def user_data():
+    unlimited = {
+        "value": None,
+        "configured_override": None,
+        "global_value": 0,
+        "origin": "unlimited",
+    }
     return {
         "username": "alice",
         "enabled": True,
         "in_runtime": False,
+        "limits": {
+            "desired": {"max_tcp_conns": unlimited, "max_unique_ips": unlimited},
+            "effective": None,
+            "effective_scope": "active_config_snapshot",
+            "subsystem_convergence": "unknown",
+        },
+        "source_deny": [],
+        "source_deny_status": {
+            "effective": None,
+            "runtime_reload_required": None,
+            "apply_mode": "generation_reload",
+            "reload_endpoint": "POST /v1/system/reload",
+            "effective_scope": "request_generation_snapshot",
+        },
         "current_connections": 0,
         "active_unique_ips": 0,
         "active_unique_ips_list": [],

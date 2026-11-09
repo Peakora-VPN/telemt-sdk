@@ -1,5 +1,5 @@
 {
-  "commit": "84e5b827a6619fb2e09ad3d09f253cdffe04bc2f",
+  "commit": "66708d2866f3f3a4541c4fa67984d408e71a8af4",
   "models": {
     "ApiEventRecord": {
       "source": "src/api/events.rs",
@@ -621,6 +621,31 @@
         }
       }
     },
+    "InheritedLimit": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "value": {
+          "type": "int | None",
+          "rust_type": "Option<usize>",
+          "omittable": false
+        },
+        "configured_override": {
+          "type": "int | None",
+          "rust_type": "Option<usize>",
+          "omittable": false
+        },
+        "global_value": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "origin": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
     "LearningResetData": {
       "source": "src/api/web_runtime.rs",
       "fields": {
@@ -1191,6 +1216,21 @@
         }
       }
     },
+    "NormalizationEffect": {
+      "source": "src/api/config_edit/diagnostics.rs",
+      "fields": {
+        "path": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "code": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
     "OperatorDrainStatus": {
       "source": "src/web/manager/operator_lifecycle/status.rs",
       "fields": {
@@ -1317,6 +1357,16 @@
         "changed": {
           "type": "list[str]",
           "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "changed_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "normalization_effects": {
+          "type": "list[NormalizationEffect]",
+          "rust_type": "Vec<diagnostics::NormalizationEffect>",
           "omittable": false
         },
         "reload": {
@@ -3271,6 +3321,36 @@
         }
       }
     },
+    "SourceDenyState": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "effective": {
+          "type": "list[str] | None",
+          "rust_type": "Option<Vec<ipnetwork::IpNetwork>>",
+          "omittable": false
+        },
+        "runtime_reload_required": {
+          "type": "bool | None",
+          "rust_type": "Option<bool>",
+          "omittable": false
+        },
+        "apply_mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "reload_endpoint": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "effective_scope": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
     "SummaryData": {
       "source": "src/api/model.rs",
       "fields": {
@@ -3619,6 +3699,21 @@
           "rust_type": "Option<usize>",
           "omittable": false
         },
+        "limits": {
+          "type": "UserLimitState",
+          "rust_type": "UserLimitState",
+          "omittable": false
+        },
+        "source_deny": {
+          "type": "list[str]",
+          "rust_type": "Vec<ipnetwork::IpNetwork>",
+          "omittable": false
+        },
+        "source_deny_status": {
+          "type": "SourceDenyState",
+          "rust_type": "SourceDenyState",
+          "omittable": false
+        },
         "current_connections": {
           "type": "int",
           "rust_type": "u64",
@@ -3652,6 +3747,46 @@
         "links": {
           "type": "UserLinks",
           "rust_type": "UserLinks",
+          "omittable": false
+        }
+      }
+    },
+    "UserLimitSnapshot": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "max_tcp_conns": {
+          "type": "InheritedLimit",
+          "rust_type": "InheritedLimit",
+          "omittable": false
+        },
+        "max_unique_ips": {
+          "type": "InheritedLimit",
+          "rust_type": "InheritedLimit",
+          "omittable": false
+        }
+      }
+    },
+    "UserLimitState": {
+      "source": "src/api/model/users.rs",
+      "fields": {
+        "desired": {
+          "type": "UserLimitSnapshot",
+          "rust_type": "UserLimitSnapshot",
+          "omittable": false
+        },
+        "effective": {
+          "type": "UserLimitSnapshot | None",
+          "rust_type": "Option<UserLimitSnapshot>",
+          "omittable": false
+        },
+        "effective_scope": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "subsystem_convergence": {
+          "type": "str",
+          "rust_type": "&'static str",
           "omittable": false
         }
       }
