@@ -1042,3 +1042,108 @@ def test_discovery_models_require_core_fields():
         )
     with pytest.raises(ValidationError):
         m.ApplyPolicy(watcher="supported", reload="supported")
+
+
+def _policy(**overrides):
+    policy = {
+        "user_max_tcp_conns_global_each": 12,
+        "user_max_unique_ips_global_each": 8,
+        "user_max_unique_ips_mode": "active_window",
+        "user_max_unique_ips_window_secs": 300,
+        "cidr_rate_limits": {
+            "192.0.2.0/24": {"up_bps": 8_000_000, "down_bps": 16_000_000},
+            "*6/64": {"up_bps": 0, "down_bps": 16_000_000},
+        },
+    }
+    policy.update(overrides)
+    return policy
+
+
+def _access_policy_data(**overrides):
+    data = {
+        "desired": _policy(),
+        "effective": _policy(user_max_tcp_conns_global_each=6),
+        "runtime": _runtime_baseline(),
+        "published_match": False,
+        "effective_scope": "active_config_snapshot",
+        "subsystem_convergence": "unknown",
+        "apply_mode": "watcher",
+    }
+    data.update(overrides)
+    return data
+
+
+def test_access_policy_data_get_response_parses():
+    # GET /v1/access/policy omits changed_paths; desired and effective may differ
+    # while the watcher publication is still pending.
+    data = m.AccessPolicyData(**_access_policy_data())
+    assert data.desired.user_max_tcp_conns_global_each == 12
+    assert data.effective.user_max_tcp_conns_global_each == 6
+    assert data.desired.user_max_unique_ips_mode == "active_window"
+    assert data.desired.user_max_unique_ips_window_secs == 300
+    rate = data.desired.cidr_rate_limits["192.0.2.0/24"]
+    assert rate.up_bps == 8_000_000
+    assert rate.down_bps == 16_000_000
+    assert data.desired.cidr_rate_limits["*6/64"].up_bps == 0
+    assert data.published_match is False
+    assert data.effective_scope == "active_config_snapshot"
+    assert data.subsystem_convergence == "unknown"
+    assert data.apply_mode == "watcher"
+    assert data.runtime.active_generation == 7
+    assert data.runtime.runtime_match.endswith(":7:42")
+    assert data.changed_paths is None
+    assert "changed_paths" not in data.model_fields_set
+    envelope = m.APIResponse[m.AccessPolicyData].model_validate(
+        {"ok": True, "revision": "ab" * 32, "data": data.model_dump()}
+    )
+    assert envelope.revision == "ab" * 32
+    assert envelope.data.desired.cidr_rate_limits["*6/64"].down_bps == 16_000_000
+
+
+def test_access_policy_data_patch_response_includes_changed_paths():
+    data = m.AccessPolicyData(
+        **_access_policy_data(
+            published_match=True,
+            changed_paths=[
+                "access.user_max_tcp_conns_global_each",
+                "access.cidr_rate_limits.192.0.2.0/24",
+            ],
+        )
+    )
+    assert data.published_match is True
+    assert data.changed_paths == [
+        "access.user_max_tcp_conns_global_each",
+        "access.cidr_rate_limits.192.0.2.0/24",
+    ]
+    assert "changed_paths" in data.model_fields_set
+
+
+def test_access_policy_models_require_core_fields():
+    with pytest.raises(ValidationError):
+        m.CidrRateLimit(up_bps=1)
+    with pytest.raises(ValidationError):
+        m.AccessPolicy(
+            user_max_tcp_conns_global_each=1,
+            user_max_unique_ips_global_each=1,
+            user_max_unique_ips_mode="active_window",
+            user_max_unique_ips_window_secs=300,
+        )
+    with pytest.raises(ValidationError):
+        m.AccessPolicyData(
+            desired=_policy(),
+            effective=_policy(),
+            runtime=_runtime_baseline(),
+            published_match="true",
+            effective_scope="active_config_snapshot",
+            subsystem_convergence="unknown",
+            apply_mode="watcher",
+        )
+    with pytest.raises(ValidationError):
+        m.AccessPolicyData(
+            desired=_policy(),
+            effective=_policy(),
+            published_match=True,
+            effective_scope="active_config_snapshot",
+            subsystem_convergence="unknown",
+            apply_mode="watcher",
+        )

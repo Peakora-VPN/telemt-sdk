@@ -1,6 +1,81 @@
 {
   "commit": "66708d2866f3f3a4541c4fa67984d408e71a8af4",
   "models": {
+    "AccessPolicy": {
+      "source": "src/api/access_policy.rs",
+      "fields": {
+        "user_max_tcp_conns_global_each": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "user_max_unique_ips_global_each": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        },
+        "user_max_unique_ips_mode": {
+          "type": "str",
+          "rust_type": "UserMaxUniqueIpsMode",
+          "omittable": false
+        },
+        "user_max_unique_ips_window_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "cidr_rate_limits": {
+          "type": "dict[str, CidrRateLimit]",
+          "rust_type": "BTreeMap<String, RateLimitBps>",
+          "omittable": false
+        }
+      }
+    },
+    "AccessPolicyData": {
+      "source": "src/api/access_policy.rs",
+      "fields": {
+        "desired": {
+          "type": "AccessPolicy",
+          "rust_type": "Policy",
+          "omittable": false
+        },
+        "effective": {
+          "type": "AccessPolicy",
+          "rust_type": "Policy",
+          "omittable": false
+        },
+        "runtime": {
+          "type": "RuntimeBaseline",
+          "rust_type": "RuntimeBaseline",
+          "omittable": false
+        },
+        "published_match": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "effective_scope": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "subsystem_convergence": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "apply_mode": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "changed_paths": {
+          "type": "list[str] | None",
+          "rust_type": "Option<Vec<String>>",
+          "omittable": true
+        }
+      }
+    },
     "ApiEventRecord": {
       "source": "src/api/events.rs",
       "fields": {
@@ -122,6 +197,21 @@
         "operations": {
           "type": "list[OperationCapability]",
           "rust_type": "Vec<OperationCapability>",
+          "omittable": false
+        }
+      }
+    },
+    "CidrRateLimit": {
+      "source": "src/config/types/access.rs",
+      "fields": {
+        "up_bps": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "down_bps": {
+          "type": "int",
+          "rust_type": "u64",
           "omittable": false
         }
       }
