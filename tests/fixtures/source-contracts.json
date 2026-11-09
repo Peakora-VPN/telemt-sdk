@@ -26,6 +26,66 @@
         }
       }
     },
+    "ApplyPolicy": {
+      "source": "src/api/discovery/schema.rs",
+      "fields": {
+        "watcher": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "reload": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "effect": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        }
+      }
+    },
+    "CapabilitiesData": {
+      "source": "src/api/discovery.rs",
+      "fields": {
+        "api_version": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "schema_version": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "software_version": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "config_schema": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "read_only": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "availability_scope": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "operations": {
+          "type": "list[OperationCapability]",
+          "rust_type": "Vec<OperationCapability>",
+          "omittable": false
+        }
+      }
+    },
     "ClassCount": {
       "source": "src/api/model.rs",
       "fields": {
@@ -37,6 +97,81 @@
         "total": {
           "type": "int",
           "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "ConfigPatchSemantics": {
+      "source": "src/api/discovery/schema.rs",
+      "fields": {
+        "objects": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "arrays": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "object_null_members": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "reset": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "source_ownership": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "if_match": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
+    "ConfigSchemaData": {
+      "source": "src/api/discovery/schema.rs",
+      "fields": {
+        "schema_version": {
+          "type": "int",
+          "rust_type": "u32",
+          "omittable": false
+        },
+        "value_schema_dialect": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "defaults_scope": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "validation_scope": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "path_notation": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "config_patch": {
+          "type": "ConfigPatchSemantics",
+          "rust_type": "ConfigPatchSemantics",
+          "omittable": false
+        },
+        "fields": {
+          "type": "list[FieldMetadata]",
+          "rust_type": "Vec<FieldMetadata>",
           "omittable": false
         }
       }
@@ -532,6 +667,111 @@
         "global_each": {
           "type": "int",
           "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
+    "FieldApi": {
+      "source": "src/api/discovery/schema.rs",
+      "fields": {
+        "config_read": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "config_write": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "read_routes": {
+          "type": "list[str]",
+          "rust_type": "Vec<&'static str>",
+          "omittable": false
+        },
+        "write_routes": {
+          "type": "list[str]",
+          "rust_type": "Vec<&'static str>",
+          "omittable": false
+        },
+        "request_field": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "non_editable_reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "null_behavior": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
+    "FieldMetadata": {
+      "source": "src/api/discovery/schema.rs",
+      "fields": {
+        "path": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "value": {
+          "type": "JsonValue",
+          "rust_type": "Value",
+          "omittable": false
+        },
+        "default_kind": {
+          "type": "str",
+          "rust_type": "DefaultKind",
+          "omittable": false
+        },
+        "sensitivity": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "description": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "aliases": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": true
+        },
+        "unit": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "apply": {
+          "type": "ApplyPolicy",
+          "rust_type": "ApplyPolicy",
+          "omittable": false
+        },
+        "dependencies": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": true
+        },
+        "constraints": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": true
+        },
+        "default": {
+          "type": "JsonValue | None",
+          "rust_type": "Option<Value>",
+          "omittable": true
+        },
+        "api": {
+          "type": "FieldApi",
+          "rust_type": "FieldApi",
           "omittable": false
         }
       }
@@ -1228,6 +1468,111 @@
           "type": "str",
           "rust_type": "&'static str",
           "omittable": false
+        }
+      }
+    },
+    "OperationCapability": {
+      "source": "src/api/discovery.rs",
+      "fields": {
+        "id": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "method": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "path": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "aliases": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": true
+        },
+        "gate": {
+          "type": "str",
+          "rust_type": "Gate",
+          "omittable": false
+        },
+        "success": {
+          "type": "list[int]",
+          "rust_type": "Vec<u16>",
+          "omittable": false
+        },
+        "credential_bearing": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "body": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": true
+        },
+        "optional_body": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "exact_json_content_type": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "if_match": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "if_runtime_match": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "read_only_operation": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "supported": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "enabled": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "available": {
+          "type": "bool | None",
+          "rust_type": "Option<bool>",
+          "omittable": false
+        },
+        "mutable": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "disabled_reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "unavailable_reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
+        },
+        "mutation_blocked_reason": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
         }
       }
     },

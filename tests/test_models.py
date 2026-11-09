@@ -405,3 +405,344 @@ def test_all_public_models_have_resolved_schema():
         model = getattr(m, name)
         if isinstance(model, type) and issubclass(model, m.ResponseModel):
             assert model.model_json_schema()["title"] == name
+
+
+CAPABILITIES_DATA = {
+    "api_version": "v1",
+    "schema_version": 1,
+    "software_version": "3.5.17",
+    "config_schema": "/v1/config/schema",
+    "read_only": False,
+    "availability_scope": "feature_and_runtime_source_prerequisites_not_request_success",
+    "operations": [
+        {
+            "id": "health",
+            "method": "GET",
+            "path": "/v1/health",
+            "gate": "always",
+            "success": [200],
+            "supported": True,
+            "enabled": True,
+            "available": True,
+            "mutable": False,
+        },
+        {
+            "id": "config_validate",
+            "method": "POST",
+            "path": "/v1/config/validate",
+            "gate": "always",
+            "success": [200],
+            "body": "PatchConfigRequest",
+            "if_match": True,
+            "if_runtime_match": True,
+            "read_only_operation": True,
+            "supported": True,
+            "enabled": True,
+            "available": None,
+            "mutable": False,
+            "unavailable_reason": "availability_not_sampled",
+        },
+        {
+            "id": "users_create",
+            "method": "POST",
+            "path": "/v1/users",
+            "aliases": ["/v1/users/"],
+            "gate": "always",
+            "success": [200, 409],
+            "credential_bearing": True,
+            "optional_body": True,
+            "exact_json_content_type": True,
+            "supported": True,
+            "enabled": False,
+            "available": False,
+            "mutable": True,
+            "disabled_reason": "api_disabled",
+            "mutation_blocked_reason": "read_only",
+        },
+    ],
+}
+
+
+def test_capabilities_data_parses_without_openapi_artifact():
+    # API.md lists openapi_artifact, but the 3.5.17 Rust DTO never serializes it;
+    # the payload above deliberately omits it and must parse unchanged.
+    data = m.CapabilitiesData(**CAPABILITIES_DATA)
+    assert data.api_version == "v1"
+    assert data.schema_version == 1
+    assert data.software_version == "3.5.17"
+    assert data.config_schema == "/v1/config/schema"
+    assert data.read_only is False
+    assert data.operations[0].aliases == []
+    assert data.operations[0].body is None
+    assert data.operations[0].disabled_reason is None
+    assert data.operations[0].unavailable_reason is None
+    assert data.operations[0].mutation_blocked_reason is None
+    validate = data.operations[1]
+    assert validate.body == "PatchConfigRequest"
+    assert validate.if_match is True
+    assert validate.if_runtime_match is True
+    assert validate.read_only_operation is True
+    assert validate.available is None
+    assert validate.unavailable_reason == "availability_not_sampled"
+    create = data.operations[2]
+    assert create.aliases == ["/v1/users/"]
+    assert create.credential_bearing is True
+    assert create.optional_body is True
+    assert create.exact_json_content_type is True
+    assert create.disabled_reason == "api_disabled"
+    assert create.mutation_blocked_reason == "read_only"
+    envelope = m.APIResponse[m.CapabilitiesData].model_validate(
+        {"ok": True, "revision": "abc", "data": CAPABILITIES_DATA}
+    )
+    assert envelope.data.operations[1].available is None
+    assert envelope.revision == "abc"
+
+
+def test_operation_capability_defaults_and_strictness():
+    operation = m.OperationCapability(
+        id="health",
+        method="GET",
+        path="/v1/health",
+        gate="always",
+        success=[200],
+        supported=True,
+        enabled=True,
+        mutable=False,
+    )
+    # Rust serde defaults: skipped arrays and reasons parse as empty/absent,
+    # gate and precondition flags default to false.
+    assert operation.aliases == []
+    assert operation.credential_bearing is False
+    assert operation.body is None
+    assert operation.optional_body is False
+    assert operation.exact_json_content_type is False
+    assert operation.if_match is False
+    assert operation.if_runtime_match is False
+    assert operation.read_only_operation is False
+    assert operation.available is None
+    assert operation.disabled_reason is None
+    assert operation.unavailable_reason is None
+    assert operation.mutation_blocked_reason is None
+    with pytest.raises(ValidationError):
+        m.OperationCapability(id="health", method="GET", path="/v1/health", success=[200])
+    with pytest.raises(ValidationError):
+        m.OperationCapability(
+            id="health", method="GET", path="/v1/health", gate="always", success=["200"]
+        )
+    with pytest.raises(ValidationError):
+        m.OperationCapability(
+            id="health",
+            method="GET",
+            path="/v1/health",
+            gate="always",
+            success=[200],
+            supported=True,
+            enabled=True,
+            aliases=["/v1/health/"],
+        )
+    # A future upstream flag is preserved rather than rejected.
+    future = m.OperationCapability(
+        id="health",
+        method="GET",
+        path="/v1/health",
+        gate="always",
+        success=[200],
+        supported=True,
+        enabled=True,
+        mutable=False,
+        future_upstream_flag=True,
+    )
+    assert future.model_extra == {"future_upstream_flag": True}
+
+
+def _apply_policy(**overrides):
+    policy = {
+        "watcher": "supported",
+        "reload": "supported",
+        "effect": "admission_or_accounting_policy_consumption_no_implicit_quota_reset",
+    }
+    policy.update(overrides)
+    return policy
+
+
+def _field_api(**overrides):
+    api = {
+        "config_read": False,
+        "config_write": False,
+        "read_routes": [],
+        "write_routes": [],
+        "null_behavior": "not_editable",
+    }
+    api.update(overrides)
+    return api
+
+
+def test_config_schema_data_parses_field_metadata():
+    data = m.ConfigSchemaData(
+        schema_version=1,
+        value_schema_dialect="https://json-schema.org/draft/2020-12/schema",
+        defaults_scope="unconfigured_type_defaults_before_loader_normalization",
+        validation_scope="value_constraints_are_not_a_substitute_for_full_config_validation",
+        path_notation="dot_members; []=array_element; {name}=dynamic_map_key",
+        config_patch={
+            "objects": "recursive_merge",
+            "arrays": "replace_whole_array",
+            "object_null_members": "ignored_before_candidate_validation",
+            "reset": "not_supported",
+            "source_ownership": "one_independently_writable_source_per_mutation",
+            "if_match": "optional_source_manifest_revision",
+        },
+        fields=[
+            {
+                "path": "access.cidr_rate_limits.{cidr}.down_bps",
+                "value": {"type": "integer", "minimum": 0, "maximum": 100000000000},
+                "default_kind": "map_entry",
+                "sensitivity": "public",
+                "description": "Download limit in bits-per-second.",
+                "unit": "bits_per_second",
+                "apply": _apply_policy(),
+                "constraints": ["At least one direction must be nonzero; zero means unlimited."],
+                "api": _field_api(
+                    read_routes=["GET /v1/access/policy"],
+                    write_routes=["PATCH /v1/access/policy"],
+                    request_field="cidr_rate_limits",
+                    non_editable_reason="managed_via_access_policy_api",
+                    null_behavior="clear_map_or_remove_null_entries",
+                ),
+            },
+            {
+                "path": "general.me_adaptive_floor_cpu_cores_override",
+                "value": {"type": "integer", "minimum": 0, "maximum": 65535},
+                "default_kind": "type_default",
+                "sensitivity": "public",
+                "description": "Override logical CPU core count.",
+                "default": 0,
+                "apply": _apply_policy(effect="next_subsystem_policy_consumption_or_me_update"),
+                "dependencies": ["general.use_middle_proxy"],
+                "api": _field_api(
+                    config_read=True,
+                    config_write=True,
+                    read_routes=["GET /v1/config"],
+                    write_routes=["PATCH /v1/config"],
+                    null_behavior="ignored_member_then_validate_candidate",
+                ),
+            },
+            {
+                "path": "network.dns_overrides",
+                "value": {"type": "array", "items": {"type": "string"}, "maxItems": 4096},
+                "default_kind": "type_default",
+                "sensitivity": "public",
+                "description": "Runtime DNS overrides in `host:port:ip` format.",
+                "default": [],
+                "apply": _apply_policy(effect="future_resolutions_existing_connections_unchanged"),
+                "api": _field_api(
+                    config_read=True,
+                    config_write=True,
+                    read_routes=["GET /v1/config"],
+                    write_routes=["PATCH /v1/config"],
+                    null_behavior="ignored_member_then_validate_candidate",
+                ),
+            },
+        ],
+    )
+    assert data.config_patch.reset == "not_supported"
+    assert data.config_patch.if_match == "optional_source_manifest_revision"
+    cidr = data.fields[0]
+    assert cidr.value == {"type": "integer", "minimum": 0, "maximum": 100000000000}
+    assert cidr.default is None
+    assert "default" not in cidr.model_fields_set
+    assert cidr.unit == "bits_per_second"
+    assert cidr.aliases == []
+    assert cidr.dependencies == []
+    assert cidr.constraints == ["At least one direction must be nonzero; zero means unlimited."]
+    assert cidr.api.request_field == "cidr_rate_limits"
+    assert cidr.api.non_editable_reason == "managed_via_access_policy_api"
+    cores = data.fields[1]
+    assert cores.default == 0
+    assert cores.dependencies == ["general.use_middle_proxy"]
+    assert cores.api.config_write is True
+    dns = data.fields[2]
+    # Arbitrary JSON defaults round-trip untouched, including an empty array.
+    assert dns.default == []
+    envelope = m.APIResponse[m.ConfigSchemaData].model_validate(
+        {"ok": True, "revision": "abc", "data": data.model_dump()}
+    )
+    assert envelope.data.fields[1].default == 0
+
+
+def test_field_metadata_default_presence_versus_null_default():
+    # `default_kind="unset"` serializes an explicit null default; other kinds
+    # omit the member entirely, which Pydantic field-set data must distinguish.
+    unset = m.FieldMetadata(
+        path="censorship.mask_host",
+        value={"type": "string"},
+        default_kind="unset",
+        sensitivity="public",
+        description="Mask host.",
+        apply=_apply_policy(watcher="unsupported"),
+        api=_field_api(),
+        default=None,
+    )
+    assert "default" in unset.model_fields_set
+    assert unset.default is None
+    redacted = m.FieldMetadata(
+        path="access.users",
+        value={"type": "object", "additionalProperties": {"type": "string"}},
+        default_kind="redacted",
+        sensitivity="credential",
+        description="User secrets.",
+        apply=_apply_policy(),
+        api=_field_api(null_behavior="unchanged_on_user_patch"),
+    )
+    assert "default" not in redacted.model_fields_set
+    assert redacted.default is None
+    with pytest.raises(ValidationError):
+        m.FieldMetadata(
+            path="access.users",
+            value={"type": "object"},
+            default_kind="redacted",
+            sensitivity="credential",
+            description="User secrets.",
+            api=_field_api(),
+        )
+
+
+def test_discovery_models_require_core_fields():
+    without_version = {
+        key: value for key, value in CAPABILITIES_DATA.items() if key != "software_version"
+    }
+    with pytest.raises(ValidationError):
+        m.CapabilitiesData(**without_version)
+    with pytest.raises(ValidationError):
+        m.ConfigSchemaData(
+            schema_version=1,
+            value_schema_dialect="https://json-schema.org/draft/2020-12/schema",
+            defaults_scope="s",
+            validation_scope="s",
+            path_notation="s",
+            config_patch={
+                "objects": "recursive_merge",
+                "arrays": "replace_whole_array",
+                "object_null_members": "ignored",
+                "source_ownership": "one",
+                "if_match": "optional",
+            },
+            fields=[],
+        )
+    with pytest.raises(ValidationError):
+        m.ConfigPatchSemantics(
+            objects="recursive_merge",
+            arrays="replace_whole_array",
+            object_null_members="ignored",
+            source_ownership="one",
+            if_match="optional",
+        )
+    with pytest.raises(ValidationError):
+        m.FieldApi(
+            config_read=True,
+            config_write=True,
+            read_routes=[],
+            write_routes=[],
+        )
+    with pytest.raises(ValidationError):
+        m.ApplyPolicy(watcher="supported", reload="supported")
