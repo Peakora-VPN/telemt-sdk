@@ -18,7 +18,11 @@ from .exceptions import (
     TransportError,
 )
 from .hooks import ClientHook
-from .models.base import APIResponse, ErrorEnvelope, RequestModel
+from .models.base import (
+    APIEnvelopeBase,
+    ErrorEnvelope,
+    RequestModel,
+)
 from .models.requests import PatchConfigRequest, PatchUserRequest
 from .resources import (
     ConfigResource,
@@ -30,6 +34,20 @@ from .resources import (
     SystemResource,
     UsersResource,
 )
+
+_RUNTIME_MATCH_CHARACTERS = frozenset("0123456789abcdefABCDEF:")
+_RUNTIME_MATCH_MAX_LENGTH = 128
+
+
+def _validate_runtime_match(runtime_match: str) -> str:
+    if (
+        not isinstance(runtime_match, str)
+        or not runtime_match
+        or len(runtime_match) > _RUNTIME_MATCH_MAX_LENGTH
+        or any(character not in _RUNTIME_MATCH_CHARACTERS for character in runtime_match)
+    ):
+        raise ValueError("runtime_match must be 1-128 characters limited to hex digits and colons")
+    return runtime_match
 
 
 class TelemtClient:
@@ -94,22 +112,25 @@ class TelemtClient:
                 await self._http.aclose()
             self._closed = True
 
-    async def _request[T](
+    async def _request[T, E: APIEnvelopeBase](
         self,
         method: str,
         path: str,
-        response_type: type[APIResponse[T]],
+        response_type: type[E],
         *,
         body: RequestModel | None = None,
         params: Mapping[str, str | int] | None = None,
         revision: str | None = None,
+        runtime_match: str | None = None,
         accepted_statuses: tuple[int, ...] = (200, 201, 202),
-    ) -> APIResponse[T]:
+    ) -> E:
         if self._closed:
             raise RuntimeError("TelemtClient is closed")
         headers = self._headers.copy()
         if revision is not None:
             headers["If-Match"] = revision
+        if runtime_match is not None:
+            headers["If-Runtime-Match"] = _validate_runtime_match(runtime_match)
         payload = None
         if body is not None:
             body = type(body).model_validate(body)
@@ -168,6 +189,7 @@ class TelemtClient:
                 code=error.error.code,
                 message=error.error.message,
                 request_id=error.request_id,
+                details=error.details,
             )
         if response.status_code not in accepted_statuses:
             raise APIError(

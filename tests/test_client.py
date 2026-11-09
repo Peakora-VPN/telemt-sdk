@@ -95,6 +95,61 @@ async def test_config_reload_query_and_revision(mock_api):
     assert json.loads(requests[0].content) == {"web": {"enabled": False}}
 
 
+def _patch_config_success() -> httpx.Response:
+    return success(
+        {
+            "revision": "new",
+            "restart_required": False,
+            "runtime_reload_required": True,
+            "process_restart_required": False,
+            "deferred_process_fields": [],
+            "changed": ["web"],
+        },
+        status=202,
+        revision="new",
+    )
+
+
+async def test_config_update_sends_exact_runtime_match_header(mock_api):
+    client, requests, responses = mock_api
+    responses.append(_patch_config_success())
+    token = "abcdef0123456789ABCDEF:0123456789abcdef"
+    await client.config.update(m.PatchConfigRequest(web={"enabled": False}), runtime_match=token)
+    assert requests[0].headers["If-Runtime-Match"] == token
+    assert "If-Match" not in requests[0].headers
+
+
+async def test_config_update_sends_runtime_match_alongside_if_match(mock_api):
+    client, requests, responses = mock_api
+    responses.append(_patch_config_success())
+    await client.config.update(
+        m.PatchConfigRequest(web={"enabled": False}), revision='"old"', runtime_match="ab:cd"
+    )
+    assert requests[0].headers["If-Match"] == '"old"'
+    assert requests[0].headers["If-Runtime-Match"] == "ab:cd"
+
+
+async def test_config_update_accepts_max_length_runtime_match(mock_api):
+    client, requests, responses = mock_api
+    responses.append(_patch_config_success())
+    token = "ab" * 64
+    await client.config.update(m.PatchConfigRequest(web={"enabled": False}), runtime_match=token)
+    assert requests[0].headers["If-Runtime-Match"] == token
+
+
+@pytest.mark.parametrize(
+    "token",
+    ["", "f" * 129, "not-hex!", "ab:cd:ef:zz", "abcd ef"],
+)
+async def test_config_update_rejects_invalid_runtime_match_before_transport(mock_api, token):
+    client, requests, _ = mock_api
+    with pytest.raises(ValueError, match="runtime_match"):
+        await client.config.update(
+            m.PatchConfigRequest(web={"enabled": False}), runtime_match=token
+        )
+    assert requests == []
+
+
 async def test_readiness_503_is_data_but_api_disabled_is_error(mock_api):
     client, _, responses = mock_api
     responses.extend(
@@ -178,7 +233,35 @@ async def test_api_errors(mock_api, status, error_type):
     assert caught.value.message == "Rejected"
     assert caught.value.request_id == 9
     assert caught.value.status_code == status
+    assert caught.value.details == ()
     assert len(requests) == 1
+
+
+async def test_error_details_propagate_to_api_error(mock_api):
+    client, _, responses = mock_api
+    responses.append(
+        httpx.Response(
+            400,
+            json={
+                "ok": False,
+                "error": {"code": "invalid_fields", "message": "Rejected"},
+                "details": [
+                    {"path": "network.dns_overrides", "code": "invalid_entry", "message": "bad"},
+                    {"path": "web.enabled", "code": "read_only", "message": "locked"},
+                ],
+                "request_id": 11,
+            },
+        )
+    )
+    with pytest.raises(APIError) as caught:
+        await client.config.update(m.PatchConfigRequest(web={"enabled": False}))
+    assert caught.value.code == "invalid_fields"
+    assert caught.value.request_id == 11
+    details = caught.value.details
+    assert [issue.path for issue in details] == ["network.dns_overrides", "web.enabled"]
+    assert [issue.code for issue in details] == ["invalid_entry", "read_only"]
+    assert [issue.message for issue in details] == ["bad", "locked"]
+    assert all(isinstance(issue, m.FieldIssue) for issue in details)
 
 
 @pytest.mark.parametrize(

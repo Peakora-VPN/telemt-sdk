@@ -89,6 +89,36 @@ def test_valid_requests_and_serialization():
     )
 
 
+def test_nullable_revision_envelope():
+    payload = {"ok": True, "data": {"status": "ok", "read_only": False}}
+    missing = m.NullableRevisionAPIResponse[m.HealthData].model_validate(
+        {**payload, "revision": None}
+    )
+    assert missing.revision is None
+    assert missing.data.status == "ok"
+    assert missing.status_code == 200
+    present = m.NullableRevisionAPIResponse[m.HealthData].model_validate(
+        {**payload, "revision": "abc"}
+    )
+    assert present.revision == "abc"
+    with pytest.raises(ValidationError):
+        m.APIResponse[m.HealthData].model_validate({**payload, "revision": None})
+
+
+def test_field_issue_dto():
+    issue = m.FieldIssue(path="network.dns_overrides", code="invalid_entry", message="bad DNS")
+    assert (issue.path, issue.code, issue.message) == (
+        "network.dns_overrides",
+        "invalid_entry",
+        "bad DNS",
+    )
+    assert m.FieldIssue(path="p", code="c", message="m", future_upstream_field=1).model_extra == {
+        "future_upstream_field": 1
+    }
+    with pytest.raises(ValidationError):
+        m.FieldIssue(path="p", code="c")
+
+
 def test_all_public_models_have_resolved_schema():
     for name in m.__all__:
         model = getattr(m, name)

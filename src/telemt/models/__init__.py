@@ -2,6 +2,8 @@
 
 from .base import (
     APIResponse,
+    FieldIssue,
+    NullableRevisionAPIResponse,
     RequestModel,
     ResponseModel,
 )
@@ -201,6 +203,7 @@ __all__ = [
     "EffectiveUserIpPolicyLimits",
     "EffectiveUserTcpPolicyLimits",
     "FilterSelector",
+    "FieldIssue",
     "GoneSessionData",
     "HealthData",
     "HealthReadyData",
@@ -214,6 +217,7 @@ __all__ = [
     "MinimalDcPathData",
     "MinimalMeRuntimeData",
     "MinimalQuarantineData",
+    "NullableRevisionAPIResponse",
     "OperatorDrainStatus",
     "OperatorLifecycleStatus",
     "OperationRef",

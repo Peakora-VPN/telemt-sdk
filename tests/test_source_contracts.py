@@ -53,4 +53,5 @@ def test_all_response_models_are_in_source_inventory():
         "ConfigData",
         "ErrorDetail",
         "ErrorEnvelope",
+        "NullableRevisionAPIResponse",
     } == (CONTRACTS["models"].keys())

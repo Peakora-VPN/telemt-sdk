@@ -176,6 +176,7 @@ class ConfigResource(Resource):
         patch: m.PatchConfigRequest,
         *,
         revision: str | None = None,
+        runtime_match: str | None = None,
         reload: m.ReloadRequest | None = None,
     ) -> m.APIResponse[m.PatchConfigResponse]:
         params = None
@@ -190,6 +191,7 @@ class ConfigResource(Resource):
             body=patch,
             params=params,
             revision=revision,
+            runtime_match=runtime_match,
         )
 
     async def get(self) -> m.APIResponse[m.ConfigData]:
