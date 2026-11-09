@@ -14,9 +14,12 @@ from .operations import (
     UserQuotaData,
 )
 from .requests import (
+    AccessPolicyPatch,
     AllSelector,
     Carrier,
+    CidrRateLimitInput,
     CloseRequest,
+    ConfigSection,
     CreateUserRequest,
     DrainRequest,
     DrainTimeout,
@@ -36,6 +39,7 @@ from .requests import (
     SessionRef,
     SessionState,
     UInt64,
+    UserMaxUniqueIpsMode,
     Username,
 )
 from .responses import (
@@ -180,12 +184,15 @@ from .web import (
 
 __all__ = [
     "APIResponse",
+    "AccessPolicyPatch",
     "AllSelector",
     "ApiEventRecord",
     "Carrier",
+    "CidrRateLimitInput",
     "ClassCount",
     "CloseRequest",
     "ConfigData",
+    "ConfigSection",
     "ControlOperationStatus",
     "CreateUserRequest",
     "CreateUserResponse",
@@ -307,6 +314,7 @@ __all__ = [
     "UserActiveIps",
     "UserInfo",
     "UserLinks",
+    "UserMaxUniqueIpsMode",
     "UserQuota",
     "UserQuotaData",
     "Username",

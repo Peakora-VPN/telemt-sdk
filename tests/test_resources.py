@@ -76,6 +76,24 @@ WRITE_ROUTES = [
         (m.PatchConfigRequest(general={"fast_mode": True}),),
         {"general": {"fast_mode": True}},
     ),
+    (
+        "config.update",
+        "PATCH",
+        "config",
+        (m.PatchConfigRequest(network={"dns_overrides": ["upstream.example:443:192.0.2.10"]}),),
+        {"network": {"dns_overrides": ["upstream.example:443:192.0.2.10"]}},
+    ),
+    (
+        "config.update",
+        "PATCH",
+        "config",
+        (
+            m.PatchConfigRequest(
+                server={"api": {"runtime_edge_enabled": True, "runtime_edge_cache_ttl_ms": 0}}
+            ),
+        ),
+        {"server": {"api": {"runtime_edge_enabled": True, "runtime_edge_cache_ttl_ms": 0}}},
+    ),
     ("system.reload", "POST", "system/reload", (), None),
     (
         "runtime.web.close_sessions",

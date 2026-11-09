@@ -64,6 +64,40 @@ async def test_patch_preserves_omission_null_false_zero(mock_api, user_data):
     assert "If-Match" not in requests[0].headers
 
 
+async def test_create_user_sparse_body_keeps_omitted_absent_and_sends_explicit_null(
+    mock_api, user_data
+):
+    client, requests, responses = mock_api
+    secret = "ab" * 16
+    bodies = [
+        m.CreateUserRequest(username="alice"),
+        m.CreateUserRequest(username="alice", source_deny=None),
+        m.CreateUserRequest(username="alice", source_deny=["203.0.113.0/24"], enabled=False),
+    ]
+    for _ in bodies:
+        responses.append(success({"user": user_data, "secret": secret}, status=201))
+    for body in bodies:
+        await client.users.create(body)
+    assert json.loads(requests[0].content) == {"username": "alice"}
+    assert json.loads(requests[1].content) == {"username": "alice", "source_deny": None}
+    assert json.loads(requests[2].content) == {
+        "username": "alice",
+        "source_deny": ["203.0.113.0/24"],
+        "enabled": False,
+    }
+
+
+async def test_patch_user_source_deny_null_sends_null_and_omission_stays_absent(
+    mock_api, user_data
+):
+    client, requests, responses = mock_api
+    responses.extend([success(user_data, status=202), success(user_data, status=202)])
+    await client.users.update("alice", m.PatchUserRequest(source_deny=None))
+    await client.users.update("alice", m.PatchUserRequest())
+    assert json.loads(requests[0].content) == {"source_deny": None}
+    assert json.loads(requests[1].content) == {}
+
+
 async def test_config_reload_query_and_revision(mock_api):
     client, requests, responses = mock_api
     responses.append(

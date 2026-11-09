@@ -23,7 +23,12 @@ from .models.base import (
     ErrorEnvelope,
     RequestModel,
 )
-from .models.requests import PatchConfigRequest, PatchUserRequest
+from .models.requests import (
+    AccessPolicyPatch,
+    CreateUserRequest,
+    PatchConfigRequest,
+    PatchUserRequest,
+)
 from .resources import (
     ConfigResource,
     HealthResource,
@@ -135,9 +140,12 @@ class TelemtClient:
         if body is not None:
             body = type(body).model_validate(body)
             headers["Content-Type"] = "application/json"
-            is_patch = isinstance(body, (PatchUserRequest, PatchConfigRequest))
+            # Sparse bodies keep omitted fields absent and send explicit nulls.
+            is_sparse = isinstance(
+                body, (AccessPolicyPatch, CreateUserRequest, PatchConfigRequest, PatchUserRequest)
+            )
             payload = body.model_dump(
-                mode="json", exclude_unset=is_patch, exclude_none=not is_patch, by_alias=True
+                mode="json", exclude_unset=is_sparse, exclude_none=not is_sparse, by_alias=True
             )
         url = self._base_url.join(path).copy_with(params=params)
         request = self._http.build_request(
