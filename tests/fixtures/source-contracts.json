@@ -26,6 +26,46 @@
         }
       }
     },
+    "ApplyImpact": {
+      "source": "src/api/config_edit/preflight.rs",
+      "fields": {
+        "watcher_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "generation_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "process_restart_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "restart_required": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "runtime_reload_required": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "process_restart_required": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "deferred_process_fields": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        }
+      }
+    },
     "ApplyPolicy": {
       "source": "src/api/discovery/schema.rs",
       "fields": {
@@ -101,6 +141,56 @@
         }
       }
     },
+    "ConfigComparison": {
+      "source": "src/api/config_state.rs",
+      "fields": {
+        "scope": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "status": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "pending_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "watcher_pending_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "generation_pending_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "process_deferred_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "deferred_process_fields": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "runtime_derived_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "truncated": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        }
+      }
+    },
     "ConfigPatchSemantics": {
       "source": "src/api/discovery/schema.rs",
       "fields": {
@@ -132,6 +222,36 @@
         "if_match": {
           "type": "str",
           "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
+    "ConfigProjection": {
+      "source": "src/api/config_projection.rs",
+      "fields": {
+        "fields": {
+          "type": "list[FieldProjection]",
+          "rust_type": "Vec<FieldProjection>",
+          "omittable": false
+        },
+        "truncated": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "provenance": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "source_revision": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        },
+        "source_count": {
+          "type": "int | None",
+          "rust_type": "Option<usize>",
           "omittable": false
         }
       }
@@ -172,6 +292,156 @@
         "fields": {
           "type": "list[FieldMetadata]",
           "rust_type": "Vec<FieldMetadata>",
+          "omittable": false
+        }
+      }
+    },
+    "ConfigStateData": {
+      "source": "src/api/config_state.rs",
+      "fields": {
+        "scope": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "sections": {
+          "type": "list[str]",
+          "rust_type": "BTreeSet<String>",
+          "omittable": false
+        },
+        "runtime": {
+          "type": "RuntimeBaseline",
+          "rust_type": "RuntimeBaseline",
+          "omittable": false
+        },
+        "runtime_sample_current": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "desired_revision": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        },
+        "desired_status": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "desired_error": {
+          "type": "FieldIssue | None",
+          "rust_type": "Option<FieldIssue>",
+          "omittable": false
+        },
+        "desired": {
+          "type": "ConfigProjection | None",
+          "rust_type": "Option<projection::Projection>",
+          "omittable": false
+        },
+        "effective": {
+          "type": "ConfigProjection | None",
+          "rust_type": "Option<projection::Projection>",
+          "omittable": false
+        },
+        "projection_error": {
+          "type": "FieldIssue | None",
+          "rust_type": "Option<FieldIssue>",
+          "omittable": false
+        },
+        "comparison": {
+          "type": "ConfigComparison",
+          "rust_type": "Comparison",
+          "omittable": false
+        },
+        "watcher": {
+          "type": "WatchOutcome | None",
+          "rust_type": "Option<WatchOutcome>",
+          "omittable": false
+        },
+        "watcher_matches_desired": {
+          "type": "bool | None",
+          "rust_type": "Option<bool>",
+          "omittable": false
+        },
+        "reload": {
+          "type": "ReloadObservation | None",
+          "rust_type": "Option<ReloadObservation>",
+          "omittable": false
+        },
+        "reload_observation": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "reload_matches_desired": {
+          "type": "bool | None",
+          "rust_type": "Option<bool>",
+          "omittable": false
+        },
+        "subsystem_convergence": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        }
+      }
+    },
+    "ConfigValidationData": {
+      "source": "src/api/config_edit/preflight.rs",
+      "fields": {
+        "valid": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "base_revision": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "candidate_revision": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "runtime": {
+          "type": "RuntimeBaseline",
+          "rust_type": "RuntimeBaseline",
+          "omittable": false
+        },
+        "changed_paths": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "normalization_effects": {
+          "type": "list[NormalizationEffect]",
+          "rust_type": "Vec<diagnostics::NormalizationEffect>",
+          "omittable": false
+        },
+        "apply": {
+          "type": "ApplyImpact",
+          "rust_type": "ApplyImpact",
+          "omittable": false
+        },
+        "source_ownership": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "touched_sections": {
+          "type": "list[str]",
+          "rust_type": "Vec<String>",
+          "omittable": false
+        },
+        "reload": {
+          "type": "ReloadRequest | None",
+          "rust_type": "Option<ReloadRequest>",
+          "omittable": false
+        },
+        "warnings": {
+          "type": "list[FieldIssue]",
+          "rust_type": "Vec<FieldIssue>",
           "omittable": false
         }
       }
@@ -773,6 +1043,51 @@
           "type": "FieldApi",
           "rust_type": "FieldApi",
           "omittable": false
+        }
+      }
+    },
+    "FieldProjection": {
+      "source": "src/api/config_projection.rs",
+      "fields": {
+        "path": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "value": {
+          "type": "JsonValue | None",
+          "rust_type": "Option<Value>",
+          "omittable": true
+        },
+        "redacted": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "present": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "entries": {
+          "type": "int | None",
+          "rust_type": "Option<usize>",
+          "omittable": false
+        },
+        "differs": {
+          "type": "bool | None",
+          "rust_type": "Option<bool>",
+          "omittable": false
+        },
+        "origin": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "inherited_from": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": true
         }
       }
     },
@@ -1756,6 +2071,66 @@
         }
       }
     },
+    "ReloadObservation": {
+      "source": "src/maestro/reload_observation.rs",
+      "fields": {
+        "reload_id": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "target_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "source_revision": {
+          "type": "str",
+          "rust_type": "String",
+          "omittable": false
+        },
+        "phase": {
+          "type": "str",
+          "rust_type": "ReloadPhase",
+          "omittable": false
+        },
+        "source_generation": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "activated_generation": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "retiring_generation": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "retiring_config_epoch": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "retirement": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
+          "omittable": false
+        },
+        "error_present": {
+          "type": "bool",
+          "rust_type": "bool",
+          "omittable": false
+        },
+        "warning_count": {
+          "type": "int",
+          "rust_type": "usize",
+          "omittable": false
+        }
+      }
+    },
     "ReloadStatus": {
       "source": "src/maestro/reload.rs",
       "fields": {
@@ -1837,6 +2212,26 @@
         "last_reset_epoch_secs": {
           "type": "int",
           "rust_type": "u64",
+          "omittable": false
+        }
+      }
+    },
+    "RuntimeBaseline": {
+      "source": "src/api/config_edit/preflight.rs",
+      "fields": {
+        "active_generation": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "config_epoch": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "runtime_match": {
+          "type": "str",
+          "rust_type": "String",
           "omittable": false
         }
       }
@@ -4217,6 +4612,41 @@
         "users": {
           "type": "list[UserQuota]",
           "rust_type": "Vec<UserQuotaEntry>",
+          "omittable": false
+        }
+      }
+    },
+    "WatchOutcome": {
+      "source": "src/config/observation.rs",
+      "fields": {
+        "sequence": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "observed_at_epoch_secs": {
+          "type": "int",
+          "rust_type": "u64",
+          "omittable": false
+        },
+        "phase": {
+          "type": "str",
+          "rust_type": "&'static str",
+          "omittable": false
+        },
+        "source_revision": {
+          "type": "str | None",
+          "rust_type": "Option<String>",
+          "omittable": false
+        },
+        "published_config_epoch": {
+          "type": "int | None",
+          "rust_type": "Option<u64>",
+          "omittable": false
+        },
+        "error_code": {
+          "type": "str | None",
+          "rust_type": "Option<&'static str>",
           "omittable": false
         }
       }

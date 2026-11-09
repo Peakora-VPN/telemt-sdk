@@ -707,6 +707,302 @@ def test_field_metadata_default_presence_versus_null_default():
         )
 
 
+def _runtime_baseline(**overrides):
+    baseline = {
+        "active_generation": 7,
+        "config_epoch": 42,
+        "runtime_match": "ab" * 16 + ":7:42",
+    }
+    baseline.update(overrides)
+    return baseline
+
+
+def _field_row(**overrides):
+    row = {
+        "path": "general.fast_mode",
+        "value": True,
+        "redacted": False,
+        "present": True,
+        "entries": None,
+        "differs": False,
+        "origin": "source",
+    }
+    row.update(overrides)
+    return row
+
+
+def _projection(**overrides):
+    projection = {
+        "fields": [_field_row()],
+        "truncated": False,
+        "provenance": "normalized_source",
+        "source_revision": "cd" * 32,
+        "source_count": 1,
+    }
+    projection.update(overrides)
+    return projection
+
+
+def _comparison(**overrides):
+    comparison = {
+        "scope": "selected_sections",
+        "status": "published_match",
+        "pending_paths": [],
+        "watcher_pending_paths": [],
+        "generation_pending_paths": [],
+        "process_deferred_paths": [],
+        "deferred_process_fields": [],
+        "runtime_derived_paths": [],
+        "truncated": False,
+    }
+    comparison.update(overrides)
+    return comparison
+
+
+def _state_payload(**overrides):
+    payload = {
+        "scope": "published_configuration_not_subsystem_acknowledgment",
+        "sections": ["access", "general"],
+        "runtime": _runtime_baseline(),
+        "runtime_sample_current": True,
+        "desired_revision": "ef" * 32,
+        "desired_status": "valid",
+        "desired_error": None,
+        "desired": _projection(),
+        "effective": _projection(),
+        "projection_error": None,
+        "comparison": _comparison(),
+        "watcher": {
+            "sequence": 3,
+            "observed_at_epoch_secs": 1_700_000_000,
+            "phase": "published",
+            "source_revision": "ef" * 32,
+            "published_config_epoch": 42,
+            "error_code": None,
+        },
+        "watcher_matches_desired": True,
+        "reload": {
+            "reload_id": 9,
+            "target_generation": 7,
+            "source_revision": "ef" * 32,
+            "phase": "succeeded",
+            "source_generation": 6,
+            "activated_generation": 7,
+            "retiring_generation": 6,
+            "retiring_config_epoch": 41,
+            "retirement": "retired",
+            "error_present": False,
+            "warning_count": 0,
+        },
+        "reload_observation": "sampled",
+        "reload_matches_desired": True,
+        "subsystem_convergence": "unknown",
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_config_state_data_full_state_parses():
+    data = m.ConfigStateData(**_state_payload())
+    assert data.runtime.active_generation == 7
+    assert data.runtime.runtime_match.endswith(":7:42")
+    assert data.sections == ["access", "general"]
+    assert data.desired is not None
+    assert data.desired.fields[0].path == "general.fast_mode"
+    assert data.desired.fields[0].value is True
+    assert data.desired.source_revision == "cd" * 32
+    assert data.effective is not None
+    assert data.comparison.status == "published_match"
+    assert data.watcher is not None
+    assert data.watcher.phase == "published"
+    assert data.watcher.error_code is None
+    assert data.watcher_matches_desired is True
+    assert data.reload is not None
+    assert data.reload.phase == "succeeded"
+    assert data.reload.activated_generation == 7
+    assert data.reload.warning_count == 0
+    envelope = m.NullableRevisionAPIResponse[m.ConfigStateData].model_validate(
+        {"ok": True, "revision": data.desired_revision, "data": data.model_dump()}
+    )
+    assert envelope.revision == "ef" * 32
+    assert envelope.data.comparison.scope == "selected_sections"
+
+
+def test_config_state_data_partial_state_and_nullable_revision():
+    # Busy inspection slots still return 200: runtime identity is present,
+    # desired/effective projections are absent, and the envelope revision is null.
+    data = m.ConfigStateData(
+        **_state_payload(
+            runtime_sample_current=False,
+            desired_revision=None,
+            desired_status="busy",
+            desired_error={"path": "$", "code": "config_state_busy", "message": "occupied"},
+            desired=None,
+            effective=None,
+            comparison=_comparison(status="unknown"),
+            watcher=None,
+            watcher_matches_desired=None,
+            reload=None,
+            reload_observation="busy",
+            reload_matches_desired=None,
+        )
+    )
+    assert data.desired is None
+    assert data.effective is None
+    assert data.desired_revision is None
+    assert data.desired_error is not None
+    assert data.desired_error.code == "config_state_busy"
+    assert data.watcher is None
+    assert data.reload is None
+    envelope = m.NullableRevisionAPIResponse[m.ConfigStateData].model_validate(
+        {"ok": True, "revision": None, "data": data.model_dump()}
+    )
+    assert envelope.revision is None
+    assert envelope.data.desired_status == "busy"
+
+
+def test_watch_outcome_and_reload_observation_nullable_fields():
+    # Rust serializes these optionals even when null, but a partial or older
+    # server sample may omit them; the SDK accepts both and exposes None.
+    watcher = m.WatchOutcome(sequence=1, observed_at_epoch_secs=100, phase="initial")
+    assert watcher.source_revision is None
+    assert watcher.published_config_epoch is None
+    assert watcher.error_code is None
+    reload = m.ReloadObservation(
+        reload_id=1,
+        target_generation=2,
+        source_revision="ab" * 32,
+        phase="accepted",
+        error_present=False,
+        warning_count=0,
+    )
+    assert reload.source_generation is None
+    assert reload.activated_generation is None
+    assert reload.retiring_generation is None
+    assert reload.retiring_config_epoch is None
+    assert reload.retirement is None
+
+
+def test_config_validation_data_preflight_result():
+    data = m.ConfigValidationData(
+        valid=True,
+        base_revision="11" * 32,
+        candidate_revision="22" * 32,
+        runtime=_runtime_baseline(),
+        changed_paths=["network.dns_overrides"],
+        normalization_effects=[
+            {"path": "upstreams[0].bindtodevice", "code": "alias_canonicalized"}
+        ],
+        apply={
+            "watcher_paths": ["network.dns_overrides"],
+            "generation_paths": [],
+            "process_restart_paths": [],
+            "restart_required": False,
+            "runtime_reload_required": True,
+            "process_restart_required": False,
+            "deferred_process_fields": [],
+        },
+        source_ownership="single_source",
+        touched_sections=["network"],
+        reload={"mode": "instant", "failure_policy": "keep_new"},
+        warnings=[
+            {
+                "path": "$",
+                "code": "preparation_reads",
+                "message": "Preparation may read DNS and static assets",
+            },
+            {
+                "path": "$",
+                "code": "reload_not_requested",
+                "message": "Generation-owned changes require an explicit reload",
+            },
+        ],
+    )
+    assert data.apply.runtime_reload_required is True
+    assert data.apply.watcher_paths == ["network.dns_overrides"]
+    assert data.reload is not None
+    assert data.reload.mode == "instant"
+    assert data.warnings[0].code == "preparation_reads"
+    assert data.warnings[1].path == "$"
+    effect = data.normalization_effects[0]
+    assert effect.path == "upstreams[0].bindtodevice"
+    assert effect.code == "alias_canonicalized"
+    envelope = m.APIResponse[m.ConfigValidationData].model_validate(
+        {"ok": True, "revision": data.base_revision, "data": data.model_dump()}
+    )
+    assert envelope.revision == "11" * 32
+    assert envelope.data.touched_sections == ["network"]
+
+
+def test_field_projection_value_absent_versus_explicit_null():
+    # A redacted row omits `value`; a public JSON null sets it explicitly.
+    # model_fields_set is the only way to tell those two apart.
+    redacted = m.FieldProjection(
+        path="access.users",
+        redacted=True,
+        present=True,
+        entries=2,
+        differs=None,
+        origin="unknown",
+    )
+    assert "value" not in redacted.model_fields_set
+    assert redacted.value is None
+    visible_null = m.FieldProjection(
+        path="censorship.ad_tag",
+        value=None,
+        redacted=False,
+        present=False,
+        entries=None,
+        differs=True,
+        origin="source",
+    )
+    assert "value" in visible_null.model_fields_set
+    assert visible_null.value is None
+    # `inherited_from` appears only for a known inheritance relationship.
+    inherited = m.FieldProjection(
+        path="upstreams[0].prefer",
+        redacted=False,
+        present=False,
+        entries=None,
+        differs=False,
+        origin="inherited",
+        inherited_from="network.prefer",
+    )
+    assert inherited.inherited_from == "network.prefer"
+    assert "inherited_from" not in redacted.model_fields_set
+
+
+def test_config_state_and_validation_require_core_fields():
+    with pytest.raises(ValidationError):
+        m.RuntimeBaseline(active_generation=1, config_epoch=1)
+    with pytest.raises(ValidationError):
+        m.ConfigStateData(
+            scope="s",
+            sections=[],
+            runtime=_runtime_baseline(),
+            runtime_sample_current=True,
+            desired_status="valid",
+            reload_observation="unknown",
+            subsystem_convergence="unknown",
+        )
+    with pytest.raises(ValidationError):
+        m.ConfigValidationData(
+            valid=True,
+            base_revision="b",
+            candidate_revision="c",
+            runtime=_runtime_baseline(),
+            changed_paths=[],
+            normalization_effects=[],
+            source_ownership="single_source",
+            touched_sections=[],
+            warnings=[],
+        )
+    with pytest.raises(ValidationError):
+        m.FieldProjection(path="p", redacted=False, present=True)
+    with pytest.raises(ValidationError):
+        m.ConfigComparison(scope="selected_sections", status="unknown", truncated=False)
+
+
 def test_discovery_models_require_core_fields():
     without_version = {
         key: value for key, value in CAPABILITIES_DATA.items() if key != "software_version"
