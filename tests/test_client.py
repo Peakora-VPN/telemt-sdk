@@ -444,3 +444,38 @@ async def test_concurrent_requests_keep_independent_revisions(user_data):
             first, second = await asyncio.gather(client.users.get("alice"), client.users.get("bob"))
     assert first.revision == first.data.username == "alice"
     assert second.revision == second.data.username == "bob"
+
+
+def _operation_status(state):
+    return {
+        "operation_id": f"wo1.{'a' * 32}.0000000000000001",
+        "state": state,
+        "requested": 1,
+        "scanned": 1,
+        "matched": 1,
+        "close_signalled": 0,
+        "conflicted": 0,
+        "created_epoch_millis": 1_700_000_000_000,
+        "updated_epoch_millis": 1_700_000_000_001,
+    }
+
+
+async def test_wait_operation_returns_cancelled_result(mock_api):
+    # cancelled is terminal for WEB operations: return it instead of polling forever.
+    client, requests, responses = mock_api
+    responses.append(success(_operation_status("cancelled")))
+    result = await client.runtime.web.wait_operation(
+        f"wo1.{'a' * 32}.0000000000000001", timeout=5, poll_interval=0.01
+    )
+    assert result.data.state == "cancelled"
+    assert len(requests) == 1
+
+
+async def test_wait_operation_returns_completed_result(mock_api):
+    client, requests, responses = mock_api
+    responses.append(success(_operation_status("completed")))
+    result = await client.runtime.web.wait_operation(
+        f"wo1.{'a' * 32}.0000000000000001", timeout=5, poll_interval=0.01
+    )
+    assert result.data.state == "completed"
+    assert len(requests) == 1

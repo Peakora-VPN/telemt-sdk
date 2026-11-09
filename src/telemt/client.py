@@ -30,7 +30,9 @@ from .models.requests import (
     PatchUserRequest,
 )
 from .resources import (
+    AccessResource,
     ConfigResource,
+    DiscoveryResource,
     HealthResource,
     LimitsResource,
     RuntimeResource,
@@ -92,6 +94,8 @@ class TelemtClient:
         self.system = SystemResource(self)
         self.users = UsersResource(self)
         self.config = ConfigResource(self)
+        self.discovery = DiscoveryResource(self)
+        self.access = AccessResource(self)
         self.stats = StatsResource(self)
         self.runtime = RuntimeResource(self)
         self.security = SecurityResource(self)
