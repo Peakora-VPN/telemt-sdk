@@ -181,9 +181,7 @@ async def test_all_operations_against_telemt():
             replaced = await call(
                 "users.update",
                 "sdk_test",
-                m.PatchUserRequest(
-                    source_deny=["198.51.100.0/24", "2001:db8:abcd::/48"]
-                ),
+                m.PatchUserRequest(source_deny=["198.51.100.0/24", "2001:db8:abcd::/48"]),
                 revision=deny_view.revision,
             )
             assert replaced.data.source_deny == ["198.51.100.0/24", "2001:db8:abcd::/48"]
@@ -330,9 +328,9 @@ async def test_all_operations_against_telemt():
             assert any(
                 path.startswith("network.dns_overrides") for path in patched.data.changed_paths
             )
-            assert (
-                await call("config.get")
-            ).data.network["dns_overrides"] == ["upstream.example:443:192.0.2.10"]
+            assert (await call("config.get")).data.network["dns_overrides"] == [
+                "upstream.example:443:192.0.2.10"
+            ]
             await wait_published()
             with pytest.raises(ConflictError) as stale_source:
                 await call(

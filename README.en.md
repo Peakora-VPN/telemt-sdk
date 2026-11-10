@@ -25,11 +25,11 @@ Manage proxy users, quotas, configuration, runtime diagnostics and WEB sessions 
 `TelemtClient` groups operations into resource objects, reuses HTTP connections and returns
 Pydantic models with concrete type annotations throughout nested responses.
 
-- **48 API operations:** user management, health, statistics, reloads and WEB lifecycle control.
+- **54 API operations:** user management, health, statistics, configuration, access policy, capability discovery and WEB lifecycle control.
 - **Async throughout:** use `async with`, `await` and concurrent reads with `asyncio.gather`.
 - **Typed requests and responses:** input validation, editor completion and a `py.typed` marker.
-- **Explicit concurrency control:** pass a response revision to protect configuration changes.
-- **Predictable errors:** typed exceptions retain the HTTP status, Telemt error code and request ID.
+- **Explicit concurrency control:** pass a response revision (`revision=`) and a runtime token (`runtime_match=`) to protect configuration and access-policy changes.
+- **Predictable errors:** typed exceptions retain the HTTP status, Telemt error code, request ID and structured error details (`path`, `code`, `message`).
 
 This is a client for Telemt's HTTP management API. MTProto transport and Telegram client
 connections are handled by [Telemt](https://github.com/telemt/telemt).
@@ -187,6 +187,13 @@ ASCII letters, digits, underscores, dots or hyphens. The names `.` and `..` are 
 because HTTPX normalizes those path segments. Recurring quotas accept `daily`, `weekly`
 or `monthly` and require a positive `data_quota_bytes` on creation.
 
+The `source_deny` field accepts a list of IPv4 or IPv6 CIDR prefixes
+(`"203.0.113.0/24"`). The list blocks the user's outbound connections from those
+networks; changing it requires a runtime generation reload, reported through
+`UserInfo.source_deny_status.runtime_reload_required`. On creation, an explicitly
+passed `source_deny=None` serializes as JSON `null`, while an omitted field is not
+sent at all.
+
 ### PATCH semantics
 
 Omitted fields, `None` and zero have distinct meanings:
@@ -198,6 +205,8 @@ Omitted fields, `None` and zero have distinct meanings:
 | `PatchUserRequest(max_tcp_conns=0)` | Send an explicit zero; Telemt applies that setting's semantics. |
 | `PatchUserRequest(enabled=False)` | Disable the user. |
 | `PatchUserRequest(secret=None)` | Leave the secret unchanged, matching Telemt. |
+| `PatchUserRequest(source_deny=["203.0.113.0/24"])` | Replace the list of denied networks. |
+| `PatchUserRequest(source_deny=None)` | Clear the list of denied networks. |
 
 Use `rotate_secret()` to generate a new secret. Request objects reject unknown fields and
 invalid values. State-dependent checks, such as whether a user already exists, belong to
@@ -231,6 +240,11 @@ Every method returns `APIResponse[T]`:
 | `status_code` | `int` | Actual HTTP response status. |
 | `ok` | `Literal[True]` | A successfully decoded API envelope. |
 
+Every method except `config.state()` returns `APIResponse[T]` with a required revision.
+`config.state()` returns `NullableRevisionAPIResponse[ConfigStateData]`, whose `revision`
+is `str | None`: the server omits the revision when the desired configuration is not yet
+committed, so check for `None` before using it in `If-Match`.
+
 Nested fields are models too: `user.links.tls_domains[0].domain` and
 `status.runtime.manager.issuance_enabled` support type checking after nullable fields are
 narrowed. Import models from `telemt.models`.
@@ -248,6 +262,13 @@ await client.users.update(
 current state and decide whether your change is still valid before retrying. The client
 does not store or automatically reuse a global revision, so concurrent responses remain
 independent. WEB operations use `runtime_instance` instead.
+
+Configuration and access-policy mutations additionally accept `runtime_match=` — an
+opaque runtime-publication token from `config.state()` (`runtime.runtime_match`) or
+from `ConfigValidationData.runtime`, sent as the `If-Runtime-Match` header. The SDK
+validates the token before sending: 1–128 characters, hexadecimal digits and colons
+only. A stale token raises `ConflictError` (409 `runtime_conflict`) — the server applied
+a different configuration before your write landed.
 
 Response models retain unknown server fields in `model_extra`. Use
 `model_dump(mode="json", by_alias=True)` for a JSON-compatible representation. Configuration
@@ -281,7 +302,11 @@ if changed.data.reload is not None:
 ```
 
 Editable sections are `general`, `timeouts`, `censorship`, `upstreams`, `dc_overrides`,
-`web` and `server.listeners`. Server-side validation determines which nested settings
+`web`, `server.listeners`, the five observable `server.api` settings
+(`minimal_runtime_enabled`, `minimal_runtime_cache_ttl_ms`, `runtime_edge_enabled`,
+`runtime_edge_cache_ttl_ms`, `runtime_edge_top_n`) and `network.dns_overrides`
+(an empty list clears the DNS overrides). Other `server` and `network` keys are rejected
+by the request model. Server-side validation determines which nested settings
 can change and which require a process restart.
 
 An HTTP `202` means accepted, not completed. Poll `system.reload_status(id)` with an
@@ -289,6 +314,73 @@ application-defined interval and deadline until `succeeded`, `rolled_back` or `f
 Read `warnings`, `deferred_process_fields` and `error` from the result. To trigger a
 separate reload, call `system.reload(ReloadRequest(...))`. Drain mode requires a
 `timeout_secs` value from 1 to 3600; instant mode does not accept it.
+
+The server applies changes asynchronously: a watcher publishes the new configuration,
+and a generation reload propagates it to running workers. The `restart_required`,
+`runtime_reload_required` and `process_restart_required` flags on the `config.update()`
+response and on `ConfigValidationData.apply` show which boundaries a patch must cross —
+do not restart the process while the flags are set or before `config.state()` reports
+`comparison.status == "published_match"`.
+
+### Configuration schema, state and preflight
+
+```python
+schema = await client.config.schema()
+print(schema.data.schema_version, len(schema.data.fields))
+
+state = await client.config.state()  # or client.config.state(["network", "access"])
+print(state.revision, state.data.desired_status, state.data.comparison.status)
+
+report = await client.config.validate(
+    PatchConfigRequest(network={"dns_overrides": ["1.1.1.1"]}),
+    revision=state.revision,
+)
+print(report.data.valid, report.data.changed_paths, report.data.touched_sections)
+```
+
+`config.schema()` returns configuration-field metadata: paths, defaults, constraints,
+the apply policy (watcher, reload, effect) and the related API routes.
+
+`config.state()` compares the desired and effective configuration: field projections,
+watcher differences, reload observations and runtime. The `sections` parameter filters
+sections and takes a non-empty sequence of unique names from `general`, `network`,
+`server`, `timeouts`, `censorship`, `upstreams`, `dc_overrides`, `web`, `access`,
+`logging` and `root`. Only `sections=None` omits the query parameter entirely; an empty
+sequence, duplicates and unknown names raise `ValueError` before anything is sent.
+
+`config.validate()` preflights a patch without persisting it: nothing is committed or
+reserved, so it is safe to repeat. The result carries `valid`, `base_revision`,
+`candidate_revision`, `changed_paths`, `normalization_effects`, `touched_sections` and
+`apply` with the reload flags. On rejection the server returns structured error details
+(see the error-handling section).
+
+### Access policy
+
+```python
+from telemt.models import AccessPolicyPatch, CidrRateLimitInput
+
+policy = await client.access.get()
+print(policy.data.desired, policy.data.published_match)
+
+updated = await client.access.update(
+    AccessPolicyPatch(
+        user_max_tcp_conns_global_each=64,
+        cidr_rate_limits={"203.0.113.0/24": CidrRateLimitInput(up_bps=10_000_000)},
+    ),
+    revision=policy.revision,
+    runtime_match=policy.data.runtime.runtime_match,
+)
+print(updated.data.changed_paths)
+```
+
+`AccessPolicyPatch` is a sparse merge patch over the five policy fields: omitted fields
+stay unchanged, an explicit `None` on a scalar restores the type default, an explicit
+`None` on a `cidr_rate_limits` entry deletes that network's rule, and `None` for the
+whole map clears every rule. A completely empty patch is rejected. `cidr_rate_limits`
+keys accept CIDR prefixes and `*4/N`, `*6/N`, `*/N` templates; each value requires at
+least one positive direction (`up_bps` or `down_bps`, up to 100 Gbit/s; zero means
+"unlimited"). The response carries desired and effective snapshots, publication status
+and `changed_paths` (PATCH only).
 
 ## WEB sessions and lifecycle
 
@@ -329,6 +421,7 @@ operator `pause()` changes a separate admission fence. Check the reported runtim
 before selecting all sessions. Use `drain()` for an operator-controlled shutdown of current work.
 Session and operation references are scoped to the current server process.
 Poll the returned operation ID to observe completion; acceptance alone is not completion.
+`wait_operation()` treats `completed`, `failed` and `cancelled` as terminal states.
 
 ## Errors
 
@@ -352,8 +445,8 @@ except TransportError:
 | `AuthenticationError` | HTTP 401. |
 | `PermissionDeniedError` | HTTP 403, including read-only mode. |
 | `NotFoundError` | HTTP 404. |
-| `ConflictError` | HTTP 409, including revision conflicts. |
-| `APIError` | Other server errors; includes `status_code`, `code`, `message`, `request_id`. |
+| `ConflictError` | HTTP 409, including revision conflicts and a stale runtime token. |
+| `APIError` | Other server errors; includes `status_code`, `code`, `message`, `request_id` and `details`. |
 | `RequestTimeoutError` | HTTPX timeout; a subclass of `TransportError`. |
 | `TransportError` | Network/transport failure; the original exception is in `__cause__`. |
 | `InvalidResponseError` | Invalid JSON, envelope or response schema. |
@@ -361,6 +454,11 @@ except TransportError:
 All SDK exceptions inherit from `TelemtError`. Invalid request models raise
 `pydantic.ValidationError`; invalid route arguments raise `ValueError` (including its
 `ValidationError` subclass). Task cancellation propagates normally.
+
+For rejected requests the server may attach structured details: `APIError.details`
+holds a tuple of `FieldIssue` objects with `path`, `code` and `message` fields (for
+example, `code="unknown_field"` naming the offending path on a configuration preflight).
+The tuple is empty when the server provides no details.
 
 Two status codes carry valid data: `health.ready()` returns readiness data on HTTP 503,
 and `runtime.web.session()` returns `GoneSessionData` on HTTP 410. An error envelope on
@@ -371,8 +469,11 @@ to distinguish an expired session from `SessionRow`.
 
 The SDK follows the [Telemt project](https://github.com/telemt/telemt) and its
 [Control API](https://github.com/telemt/telemt/blob/main/docs/Architecture/API/API.md).
-The SDK covers all 48 canonical Control API operations;
-HTML `/web-status` and WEB transport endpoints are outside this management client.
+It covers all 54 Control API operations of Telemt **3.5.17** (verified against tag
+`3.5.17`, commit
+[`66708d2866f3f3a4541c4fa67984d408e71a8af4`](https://github.com/telemt/telemt/tree/66708d2866f3f3a4541c4fa67984d408e71a8af4))
+and targets Telemt 3.5.17 and compatible 3.5.x releases. HTML `/web-status` and WEB
+transport endpoints are outside this management client.
 
 Supports Python 3.13, 3.14 and 3.15 on Linux and Windows. Optional Telemt
 runtime features may return disabled/unavailable payloads: inspect `enabled`, `reason`,

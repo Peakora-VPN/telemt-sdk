@@ -261,9 +261,7 @@ class ConfigResource(Resource):
 class DiscoveryResource(Resource):
     async def capabilities(self) -> m.APIResponse[m.CapabilitiesData]:
         """GET /v1/capabilities."""
-        return await self._client._request(
-            "GET", "capabilities", m.APIResponse[m.CapabilitiesData]
-        )
+        return await self._client._request("GET", "capabilities", m.APIResponse[m.CapabilitiesData])
 
 
 class AccessResource(Resource):

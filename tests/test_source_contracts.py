@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 from types import UnionType
-from typing import get_args, get_origin
+from typing import Union, get_args, get_origin
 
 import pytest
 
@@ -16,7 +16,7 @@ def annotation_name(annotation):
     if annotation is type(None):
         return "None"
     origin = get_origin(annotation)
-    if origin is UnionType:
+    if origin in (Union, UnionType):
         return " | ".join(annotation_name(arg) for arg in get_args(annotation))
     if origin is not None:
         return (
