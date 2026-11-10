@@ -2,11 +2,11 @@
 
 The default `uv run pytest` command needs no server or network access. It includes:
 
-- MockTransport tests for requests, authentication, errors, timeouts and client ownership.
+- `MockTransport` tests for requests, authentication, errors, timeouts and client ownership
 - Replay of real successful responses for all 54 SDK operations, including live and gone
-  WEB sessions and asynchronous operation states.
-- Field names, nested types and omitted-field checks against a source-derived inventory.
-- Request boundary cases and regression tests for behavior not fully described by API docs.
+  WEB sessions and asynchronous operation states
+- Field names, nested types and omitted-field checks against a source-derived inventory
+- Request boundary cases and regression tests for behavior not fully described by API docs
 
 The source inventory and recorded responses in `tests/fixtures` were checked against
 Telemt **3.5.17**, commit
@@ -22,16 +22,18 @@ these fixtures belong only to disposable test users. No production credentials a
 `tests/integration/test_live.py` mutates users, quotas, configuration and WEB lifecycle.
 Run it only against a disposable instance using `tests/integration/telemt.toml`.
 It checks the expected initial test user before making changes. Do not point it at a
-production server. The test is skipped unless both test URL environment variables are set.
+production server. The test is skipped unless both `TELEMT_TEST_URL` and
+`TELEMT_TEST_WEB_URL` are set.
 The scenario also covers discovery capabilities, the configuration schema, full and
 section-filtered config state, preflight validation with structured invalid-field
-details, source and runtime preconditions, access-policy update/restore, user
-`source_deny` create/patch/null with generation reloads, `network.dns_overrides`
-update/clear, and API observability editing with reload.
+details, preconditions sent as the `If-Match` and `If-Runtime-Match` headers,
+access-policy update/restore, user `source_deny` create/patch/null with generation
+reloads, `network.dns_overrides` update/clear, and API observability editing with
+reload.
 
-The following Bash commands start an isolated Linux x86-64 Telemt binary with Docker.
-They use temporary files and randomly assigned localhost ports. Docker and `curl` must
-already be available. Run from the repository root:
+The following Bash script starts an isolated Linux x86-64 Telemt binary with Docker.
+It uses temporary files and randomly assigned localhost ports. Prerequisites: Bash,
+Docker, `curl`, `sha256sum`, `tar` and `uv`. Run from the repository root:
 
 ```bash
 set -euo pipefail
@@ -62,15 +64,17 @@ done
 uv run pytest tests/integration -v
 ```
 
-On Windows, use the same image, mount and environment variables from PowerShell; set
-`$env:TELEMT_TEST_URL` and `$env:TELEMT_TEST_WEB_URL` to the published localhost addresses.
-The configuration disables
-middle-proxy mode and STUN; active Telegram traffic, ME writer behavior under load and
+On Windows, run the script as-is in Git Bash, which ships Bash, `curl`, `sha256sum`
+and `tar`. From PowerShell, keep the same image, mount and port mapping, verify the
+download with `Get-FileHash -Algorithm SHA256` against the checksum above instead of
+`sha256sum --check`. Then set `$env:TELEMT_TEST_URL` and `$env:TELEMT_TEST_WEB_URL`
+to the published localhost addresses. The configuration disables middle-proxy mode
+and STUN; active Telegram traffic, middle-end (ME) writer behavior under load and
 external network failover are outside this integration scenario.
 
 ## Updating recorded responses
 
-On a fresh disposable instance, set `TELEMT_TEST_RECORD` to
+On a fresh disposable instance, set the `TELEMT_TEST_RECORD` environment variable to
 `tests/fixtures/live-responses.json` before running the live test. It records successful
 responses only, retaining distinct status/state combinations. Review the result for
 credentials and private addresses before committing, update the provenance above, then run

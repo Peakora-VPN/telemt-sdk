@@ -50,7 +50,7 @@ Or with pip:
 python -m pip install telemt-sdk
 ```
 
-For development setup, see [Contributing](CONTRIBUTING.md).
+For development setup, see [Contributing](https://github.com/Peakora-VPN/telemt-sdk/blob/main/CONTRIBUTING.md).
 
 ## Quick start
 
@@ -85,6 +85,15 @@ If your configured value is `Bearer ...`, pass that entire string. If authentica
 not configured on the server, omit the argument. Use the URL of your Control API listener,
 not the MTProto or WEB ingress port.
 
+By default, `server.api.whitelist` contains only `127.0.0.0/8`; an empty list allows
+all addresses. To manage Telemt remotely, add your network's CIDR range to the Telemt
+configuration file: the config API does not edit `whitelist` or `gray_action`. Checks
+use the direct TCP peer's IP address; the `X-Forwarded-For` header is ignored.
+Addresses outside the list follow `server.api.gray_action`: `drop` (the default) closes
+the connection without an HTTP response, so the SDK raises `TransportError`; `api`
+returns a structured `403 forbidden`, and `200` replies with an empty body that the SDK
+rejects as `InvalidResponseError`.
+
 The examples below run inside `async with TelemtClient(...) as client`
 in an async function, as in the quick start.
 
@@ -96,6 +105,7 @@ in an async function, as in the quick start.
 | `auth_header` | `None` | Exact value of the server's `Authorization` header. |
 | `timeout` | `30.0` | HTTPX timeout in seconds, or an `httpx.Timeout` object for separate connect/read/write/pool limits. |
 | `http_client` | `None` | Optional `httpx.AsyncClient` for custom TLS, proxies, transports or connection limits. |
+| `hooks` | `()` | `ClientHook` instances called around each request and response; see [HTTP hooks](#http-hooks). |
 
 Both `https://proxy.example.com/control` and `https://proxy.example.com/control/v1`
 target `/control/v1/...`. Credentials, query strings and fragments in `base_url` are rejected.
@@ -154,6 +164,8 @@ async with TelemtClient(
 
 ## Users and quotas
 
+Create a user, adjust its limits, rotate the secret and manage its state:
+
 ```python
 from telemt.models import CreateUserRequest, PatchUserRequest, RotateSecretRequest
 
@@ -168,13 +180,13 @@ created = await client.users.create(
 # created.data.secret contains the generated secret; keep it out of logs.
 print(created.data.user.username)
 
-updated = await client.users.update(
+await client.users.update(
     "alice",
     PatchUserRequest(max_tcp_conns=20, expiration_rfc3339="2027-01-01T00:00:00Z"),
     revision=created.revision,
 )
 
-rotated = await client.users.rotate_secret("alice", RotateSecretRequest())
+await client.users.rotate_secret("alice", RotateSecretRequest())
 await client.users.reset_quota("alice")
 await client.users.disable("alice")
 await client.users.enable("alice")
@@ -263,11 +275,11 @@ current state and decide whether your change is still valid before retrying. The
 does not store or automatically reuse a global revision, so concurrent responses remain
 independent. WEB operations use `runtime_instance` instead.
 
-Configuration and access-policy mutations additionally accept `runtime_match=` — an
+Configuration and access-policy mutations additionally accept `runtime_match=`: an
 opaque runtime-publication token from `config.state()` (`runtime.runtime_match`) or
 from `ConfigValidationData.runtime`, sent as the `If-Runtime-Match` header. The SDK
 validates the token before sending: 1–128 characters, hexadecimal digits and colons
-only. A stale token raises `ConflictError` (409 `runtime_conflict`) — the server applied
+only. A stale token raises `ConflictError` (409 `runtime_conflict`). The server applied
 a different configuration before your write landed.
 
 Response models retain unknown server fields in `model_extra`. Use
@@ -276,6 +288,8 @@ sections remain `dict[str, JsonValue]` because their contents are open configura
 known telemetry and WEB structures have explicit models.
 
 ## Configuration and reloads
+
+Apply a patch and wait for the reload to finish:
 
 ```python
 import asyncio
@@ -318,11 +332,13 @@ separate reload, call `system.reload(ReloadRequest(...))`. Drain mode requires a
 The server applies changes asynchronously: a watcher publishes the new configuration,
 and a generation reload propagates it to running workers. The `restart_required`,
 `runtime_reload_required` and `process_restart_required` flags on the `config.update()`
-response and on `ConfigValidationData.apply` show which boundaries a patch must cross —
-do not restart the process while the flags are set or before `config.state()` reports
+response and on `ConfigValidationData.apply` show which boundaries a patch must cross.
+Do not restart the process while the flags are set or before `config.state()` reports
 `comparison.status == "published_match"`.
 
 ### Configuration schema, state and preflight
+
+Read the schema, compare desired and effective state, and preflight a patch:
 
 ```python
 schema = await client.config.schema()
@@ -331,6 +347,8 @@ print(schema.data.schema_version, len(schema.data.fields))
 state = await client.config.state()  # or client.config.state(["network", "access"])
 print(state.revision, state.data.desired_status, state.data.comparison.status)
 
+if state.revision is None:
+    raise RuntimeError("configuration revision is not committed yet")
 report = await client.config.validate(
     PatchConfigRequest(network={"dns_overrides": ["1.1.1.1"]}),
     revision=state.revision,
@@ -352,9 +370,11 @@ sequence, duplicates and unknown names raise `ValueError` before anything is sen
 reserved, so it is safe to repeat. The result carries `valid`, `base_revision`,
 `candidate_revision`, `changed_paths`, `normalization_effects`, `touched_sections` and
 `apply` with the reload flags. On rejection the server returns structured error details
-(see the error-handling section).
+(see [Errors](#errors)).
 
 ### Access policy
+
+Read the current policy, then apply a sparse patch:
 
 ```python
 from telemt.models import AccessPolicyPatch, CidrRateLimitInput
@@ -383,6 +403,8 @@ least one positive direction (`up_bps` or `down_bps`, up to 100 Gbit/s; zero mea
 and `changed_paths` (PATCH only).
 
 ## WEB sessions and lifecycle
+
+List a user's sessions and close them on the current runtime instance:
 
 ```python
 from telemt.models import CloseRequest, RefsSelector, SessionQuery
@@ -425,6 +447,8 @@ Poll the returned operation ID to observe completion; acceptance alone is not co
 
 ## Errors
 
+Catch typed exceptions and inspect their details:
+
 ```python
 from telemt import APIError, ConflictError, TransportError
 
@@ -451,9 +475,11 @@ except TransportError:
 | `TransportError` | Network/transport failure; the original exception is in `__cause__`. |
 | `InvalidResponseError` | Invalid JSON, envelope or response schema. |
 
-All SDK exceptions inherit from `TelemtError`. Invalid request models raise
-`pydantic.ValidationError`; invalid route arguments raise `ValueError` (including its
-`ValidationError` subclass). Task cancellation propagates normally.
+All SDK exceptions inherit from `TelemtError`. Request models reject invalid fields
+with `pydantic.ValidationError`; SDK route-argument checks (`base_url`, `username`,
+`sections`, `runtime_match`) raise a bare `ValueError`. Since `pydantic.ValidationError`
+is a subclass of `ValueError`, `except ValueError` catches both. Task cancellation
+propagates normally.
 
 For rejected requests the server may attach structured details: `APIError.details`
 holds a tuple of `FieldIssue` objects with `path`, `code` and `message` fields (for
