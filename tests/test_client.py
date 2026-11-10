@@ -64,6 +64,40 @@ async def test_patch_preserves_omission_null_false_zero(mock_api, user_data):
     assert "If-Match" not in requests[0].headers
 
 
+async def test_create_user_sparse_body_keeps_omitted_absent_and_sends_explicit_null(
+    mock_api, user_data
+):
+    client, requests, responses = mock_api
+    secret = "ab" * 16
+    bodies = [
+        m.CreateUserRequest(username="alice"),
+        m.CreateUserRequest(username="alice", source_deny=None),
+        m.CreateUserRequest(username="alice", source_deny=["203.0.113.0/24"], enabled=False),
+    ]
+    for _ in bodies:
+        responses.append(success({"user": user_data, "secret": secret}, status=201))
+    for body in bodies:
+        await client.users.create(body)
+    assert json.loads(requests[0].content) == {"username": "alice"}
+    assert json.loads(requests[1].content) == {"username": "alice", "source_deny": None}
+    assert json.loads(requests[2].content) == {
+        "username": "alice",
+        "source_deny": ["203.0.113.0/24"],
+        "enabled": False,
+    }
+
+
+async def test_patch_user_source_deny_null_sends_null_and_omission_stays_absent(
+    mock_api, user_data
+):
+    client, requests, responses = mock_api
+    responses.extend([success(user_data, status=202), success(user_data, status=202)])
+    await client.users.update("alice", m.PatchUserRequest(source_deny=None))
+    await client.users.update("alice", m.PatchUserRequest())
+    assert json.loads(requests[0].content) == {"source_deny": None}
+    assert json.loads(requests[1].content) == {}
+
+
 async def test_config_reload_query_and_revision(mock_api):
     client, requests, responses = mock_api
     responses.append(
@@ -75,6 +109,8 @@ async def test_config_reload_query_and_revision(mock_api):
                 "process_restart_required": False,
                 "deferred_process_fields": [],
                 "changed": ["web"],
+                "changed_paths": ["web.enabled"],
+                "normalization_effects": [],
             },
             status=202,
             revision="new",
@@ -93,6 +129,63 @@ async def test_config_reload_query_and_revision(mock_api):
     }
     assert requests[0].headers["If-Match"] == '"old"'
     assert json.loads(requests[0].content) == {"web": {"enabled": False}}
+
+
+def _patch_config_success() -> httpx.Response:
+    return success(
+        {
+            "revision": "new",
+            "restart_required": False,
+            "runtime_reload_required": True,
+            "process_restart_required": False,
+            "deferred_process_fields": [],
+            "changed": ["web"],
+            "changed_paths": ["web.enabled"],
+            "normalization_effects": [],
+        },
+        status=202,
+        revision="new",
+    )
+
+
+async def test_config_update_sends_exact_runtime_match_header(mock_api):
+    client, requests, responses = mock_api
+    responses.append(_patch_config_success())
+    token = "abcdef0123456789ABCDEF:0123456789abcdef"
+    await client.config.update(m.PatchConfigRequest(web={"enabled": False}), runtime_match=token)
+    assert requests[0].headers["If-Runtime-Match"] == token
+    assert "If-Match" not in requests[0].headers
+
+
+async def test_config_update_sends_runtime_match_alongside_if_match(mock_api):
+    client, requests, responses = mock_api
+    responses.append(_patch_config_success())
+    await client.config.update(
+        m.PatchConfigRequest(web={"enabled": False}), revision='"old"', runtime_match="ab:cd"
+    )
+    assert requests[0].headers["If-Match"] == '"old"'
+    assert requests[0].headers["If-Runtime-Match"] == "ab:cd"
+
+
+async def test_config_update_accepts_max_length_runtime_match(mock_api):
+    client, requests, responses = mock_api
+    responses.append(_patch_config_success())
+    token = "ab" * 64
+    await client.config.update(m.PatchConfigRequest(web={"enabled": False}), runtime_match=token)
+    assert requests[0].headers["If-Runtime-Match"] == token
+
+
+@pytest.mark.parametrize(
+    "token",
+    ["", "f" * 129, "not-hex!", "ab:cd:ef:zz", "abcd ef"],
+)
+async def test_config_update_rejects_invalid_runtime_match_before_transport(mock_api, token):
+    client, requests, _ = mock_api
+    with pytest.raises(ValueError, match="runtime_match"):
+        await client.config.update(
+            m.PatchConfigRequest(web={"enabled": False}), runtime_match=token
+        )
+    assert requests == []
 
 
 async def test_readiness_503_is_data_but_api_disabled_is_error(mock_api):
@@ -178,7 +271,42 @@ async def test_api_errors(mock_api, status, error_type):
     assert caught.value.message == "Rejected"
     assert caught.value.request_id == 9
     assert caught.value.status_code == status
+    assert caught.value.details == ()
     assert len(requests) == 1
+
+
+async def test_error_details_propagate_to_api_error(mock_api):
+    client, _, responses = mock_api
+    responses.append(
+        httpx.Response(
+            400,
+            json={
+                "ok": False,
+                "error": {
+                    "code": "invalid_fields",
+                    "message": "Rejected",
+                    "details": [
+                        {
+                            "path": "network.dns_overrides",
+                            "code": "invalid_entry",
+                            "message": "bad",
+                        },
+                        {"path": "web.enabled", "code": "read_only", "message": "locked"},
+                    ],
+                },
+                "request_id": 11,
+            },
+        )
+    )
+    with pytest.raises(APIError) as caught:
+        await client.config.update(m.PatchConfigRequest(web={"enabled": False}))
+    assert caught.value.code == "invalid_fields"
+    assert caught.value.request_id == 11
+    details = caught.value.details
+    assert [issue.path for issue in details] == ["network.dns_overrides", "web.enabled"]
+    assert [issue.code for issue in details] == ["invalid_entry", "read_only"]
+    assert [issue.message for issue in details] == ["bad", "locked"]
+    assert all(isinstance(issue, m.FieldIssue) for issue in details)
 
 
 @pytest.mark.parametrize(
@@ -323,3 +451,38 @@ async def test_concurrent_requests_keep_independent_revisions(user_data):
             first, second = await asyncio.gather(client.users.get("alice"), client.users.get("bob"))
     assert first.revision == first.data.username == "alice"
     assert second.revision == second.data.username == "bob"
+
+
+def _operation_status(state):
+    return {
+        "operation_id": f"wo1.{'a' * 32}.0000000000000001",
+        "state": state,
+        "requested": 1,
+        "scanned": 1,
+        "matched": 1,
+        "close_signalled": 0,
+        "conflicted": 0,
+        "created_epoch_millis": 1_700_000_000_000,
+        "updated_epoch_millis": 1_700_000_000_001,
+    }
+
+
+async def test_wait_operation_returns_cancelled_result(mock_api):
+    # cancelled is terminal for WEB operations: return it instead of polling forever.
+    client, requests, responses = mock_api
+    responses.append(success(_operation_status("cancelled")))
+    result = await client.runtime.web.wait_operation(
+        f"wo1.{'a' * 32}.0000000000000001", timeout=5, poll_interval=0.01
+    )
+    assert result.data.state == "cancelled"
+    assert len(requests) == 1
+
+
+async def test_wait_operation_returns_completed_result(mock_api):
+    client, requests, responses = mock_api
+    responses.append(success(_operation_status("completed")))
+    result = await client.runtime.web.wait_operation(
+        f"wo1.{'a' * 32}.0000000000000001", timeout=5, poll_interval=0.01
+    )
+    assert result.data.state == "completed"
+    assert len(requests) == 1

@@ -1,5 +1,10 @@
 # Contributing
 
+This guide covers bug reports, development setup, checks, API changes and pull requests
+for the Telemt SDK.
+
+## Bug reports
+
 For a bug report, include a minimal reproduction,
 the Python/SDK/Telemt versions and the relevant API error code. Remove secrets and
 private configuration before opening an issue.
@@ -30,23 +35,25 @@ uv build
 ```
 
 Run `uv run ruff format .` to apply formatting. Mypy uses strict mode for the SDK,
-release verification script and consumer examples in `tests/typing`.
+the release scripts in `scripts/` and consumer examples in `tests/typing`.
 
 The default test suite is offline. It checks transport/error behavior, request validation,
 all resource routes, recorded real-server responses and response contracts extracted from
 Telemt's Rust types. Optional tests against a disposable server are described in
 [Testing against Telemt](docs/testing.md).
 
-CI runs on pull requests and release tags (`v*`), including new commits to open pull requests.
-It runs Ruff and mypy, then tests on Python 3.13, 3.14 and 3.15 under Linux and Windows, and builds
-the wheel and source distribution.
+CI runs the checks above on pull requests, and the release workflow runs the same checks on
+version tags (`v*`) before publishing. Both lint with Ruff, type-check with mypy, test on
+Python 3.13, 3.14 and 3.15 under Linux and Windows, and build the wheel and source
+distribution.
 
 ## Changing the API
 
 Check both Telemt's API documentation and its handlers/serialization types. Update the
-request or response model, the resource method, public exports, tests and the method
-reference together. Preserve the difference between an omitted PATCH field and explicit
-JSON `null`. Keep configuration revisions attached to individual responses.
+request or response model, the resource method, public exports, tests and the
+[method reference](docs/api-reference.md) together. Preserve the difference between an
+omitted PATCH field and explicit JSON `null`. Keep configuration revisions attached to
+individual responses.
 
 When updating compatibility fixtures, record the upstream commit and how the responses
 were obtained. Add a regression test for behavioral fixes. Include a consumer type assertion when
@@ -59,4 +66,5 @@ that requires callers to update. Contributions are provided under the repository
 [MIT license](LICENSE).
 
 Use `feat:`, `fix:` or `perf:` commit titles for SDK changes. Mark incompatible changes
-with `!` or a `BREAKING CHANGE:` footer. These messages appear in release highlights.
+with `!` or a `BREAKING CHANGE:` footer. Release highlights list these messages for
+commits that touch `src/telemt`, `pyproject.toml` or `uv.lock`.

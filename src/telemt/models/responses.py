@@ -1,4 +1,4 @@
-"""Telemt response contracts from API.md (84e5b827); unknown fields are preserved."""
+"""Telemt response contracts from API.md (66708d28); unknown fields are preserved."""
 
 from pydantic import Field, JsonValue
 
@@ -29,6 +29,50 @@ class UserLinks(ResponseModel):
     tls_domains: list[TlsDomainLink] = Field(repr=False)
 
 
+class InheritedLimit(ResponseModel):
+    """One effective limit with its configured override, global default, and origin."""
+
+    value: int | None = None
+    configured_override: int | None = None
+    global_value: int
+    origin: str
+
+
+class UserLimitSnapshot(ResponseModel):
+    """Per-user TCP and unique-IP limits sampled from one configuration snapshot."""
+
+    max_tcp_conns: InheritedLimit
+    max_unique_ips: InheritedLimit
+
+
+class UserLimitState(ResponseModel):
+    """Desired limit snapshot plus the sampled runtime-effective snapshot.
+
+    ``effective`` is null when the user is absent from the sampled runtime or
+    no runtime snapshot was supplied.
+    """
+
+    desired: UserLimitSnapshot
+    effective: UserLimitSnapshot | None = None
+    effective_scope: str
+    subsystem_convergence: str
+
+
+class SourceDenyState(ResponseModel):
+    """Desired versus sampled-runtime source-deny state.
+
+    ``effective`` and ``runtime_reload_required`` are null when no runtime
+    snapshot is available; the lists differing means a generation reload is
+    required for enforcement.
+    """
+
+    effective: list[str] | None = None
+    runtime_reload_required: bool | None = None
+    apply_mode: str
+    reload_endpoint: str
+    effective_scope: str
+
+
 class UserInfo(ResponseModel):
     username: str
     enabled: bool
@@ -41,6 +85,9 @@ class UserInfo(ResponseModel):
     rate_limit_up_bps: int | None = None
     rate_limit_down_bps: int | None = None
     max_unique_ips: int | None = None
+    limits: UserLimitState
+    source_deny: list[str]
+    source_deny_status: SourceDenyState
     current_connections: int
     active_unique_ips: int
     active_unique_ips_list: list[str]
@@ -952,6 +999,13 @@ class HealthData(ResponseModel):
     read_only: bool
 
 
+class NormalizationEffect(ResponseModel):
+    """One value normalized while preparing a config patch, without values."""
+
+    path: str
+    code: str
+
+
 class PatchConfigResponse(ResponseModel):
     revision: str
     restart_required: bool
@@ -959,6 +1013,8 @@ class PatchConfigResponse(ResponseModel):
     process_restart_required: bool
     deferred_process_fields: list[str]
     changed: list[str]
+    changed_paths: list[str]
+    normalization_effects: list[NormalizationEffect]
     reload: ReloadAccepted | None = None
 
 
@@ -970,3 +1026,4 @@ class ConfigData(ResponseModel):
     dc_overrides: dict[str, JsonValue]
     web: dict[str, JsonValue]
     server: dict[str, JsonValue] | None = None
+    network: dict[str, JsonValue] | None = None

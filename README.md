@@ -25,11 +25,11 @@
 `TelemtClient` объединяет операции в ресурсные объекты, переиспользует HTTP-соединения
 и возвращает Pydantic-модели с конкретными аннотациями типов, включая вложенные данные.
 
-- **48 операций API:** пользователи, состояние сервиса, статистика, перезагрузка и управление WEB runtime.
+- **54 операции API:** пользователи, состояние сервиса, статистика, конфигурация, политика доступа, возможности сервера и управление WEB runtime.
 - **Полностью асинхронный интерфейс:** `async with`, `await` и параллельное чтение через `asyncio.gather`.
 - **Типизированные запросы и ответы:** валидация входных данных, подсказки IDE и маркер `py.typed`.
-- **Контроль конкурентных изменений:** передача ревизии ответа для защиты обновлений конфигурации.
-- **Понятные ошибки:** отдельные классы исключений сохраняют HTTP-статус, код Telemt и идентификатор запроса.
+- **Контроль конкурентных изменений:** передача ревизии ответа (`revision=`) и токена runtime (`runtime_match=`) для защиты обновлений конфигурации и политики доступа.
+- **Понятные ошибки:** отдельные классы исключений сохраняют HTTP-статус, код Telemt, идентификатор запроса и структурированные детали ошибки (`path`, `code`, `message`).
 
 SDK работает с HTTP API управления [Telemt](https://github.com/telemt/telemt).
 Передачу MTProto-трафика и подключения клиентов Telegram обеспечивает сам Telemt.
@@ -50,7 +50,7 @@ uv add telemt-sdk
 python -m pip install telemt-sdk
 ```
 
-Настройка окружения для разработки описана в [CONTRIBUTING.md](CONTRIBUTING.md).
+Настройка окружения для разработки описана в [CONTRIBUTING.md](https://github.com/Peakora-VPN/telemt-sdk/blob/main/CONTRIBUTING.md).
 
 ## Быстрый старт
 
@@ -85,6 +85,15 @@ SDK передаёт `auth_header` в заголовке `Authorization` без 
 Если авторизация не настроена, аргумент можно опустить. Используйте адрес слушателя
 Control API, а не порт MTProto или WEB ingress.
 
+По умолчанию `server.api.whitelist` содержит только `127.0.0.0/8`; пустой список
+разрешает все адреса. Для удалённого управления добавьте нужные сети в файл конфигурации
+Telemt: config API не изменяет ни `whitelist`, ни `gray_action`. Проверка выполняется
+по IP-адресу непосредственного TCP-пира, заголовок `X-Forwarded-For` не учитывается.
+Поведение для адресов вне списка задаёт `gray_action`: значение `"drop"` (по умолчанию)
+закрывает соединение без HTTP-ответа, и SDK вызывает `TransportError`; `"api"` возвращает
+структурированный `403 forbidden`, а `"200"` отвечает пустым телом, которое SDK
+отклоняет как `InvalidResponseError`.
+
 Следующие примеры выполняются внутри `async with TelemtClient(...) as client`
 в асинхронной функции, как в быстром старте.
 
@@ -92,16 +101,17 @@ Control API, а не порт MTProto или WEB ingress.
 
 | Аргумент | По умолчанию | Назначение |
 | --- | --- | --- |
-| `base_url` | Обязателен | Абсолютный HTTP(S) URL. `/v1` добавляется, если отсутствует. Префикс reverse proxy сохраняется. |
+| `base_url` | Обязателен | Абсолютный HTTP(S) URL. `/v1` добавляется, если отсутствует. Префикс пути обратного прокси сохраняется. |
 | `auth_header` | `None` | Точное значение заголовка `Authorization`, настроенного на сервере. |
 | `timeout` | `30.0` | Тайм-аут HTTPX в секундах или `httpx.Timeout` с отдельными лимитами подключения, чтения, записи и ожидания соединения. |
 | `http_client` | `None` | Необязательный `httpx.AsyncClient` для настройки TLS, прокси, транспорта и пула соединений. |
+| `hooks` | `()` | Объекты `ClientHook` для наблюдения за запросами и ответами; см. [Хуки HTTP](#хуки-http). |
 
 Адреса `https://proxy.example.com/control` и `https://proxy.example.com/control/v1`
-оба направляют запросы в `/control/v1/...`. Учётные данные, query-параметры и фрагменты
+оба направляют запросы в `/control/v1/...`. Учётные данные, параметры запроса и фрагменты
 в `base_url` не допускаются.
 
-Используйте один клиент для нескольких запросов в пределах одного event loop:
+Используйте один клиент для нескольких запросов в пределах одного цикла событий:
 
 ```python
 health, stats = await asyncio.gather(client.health.get(), client.stats.summary())
@@ -156,6 +166,8 @@ async with TelemtClient(
 
 ## Пользователи и квоты
 
+Создайте пользователя, обновите настройки, перевыпустите секрет и управляйте состоянием учётной записи:
+
 ```python
 from telemt.models import CreateUserRequest, PatchUserRequest, RotateSecretRequest
 
@@ -170,13 +182,12 @@ created = await client.users.create(
 # created.data.secret содержит сгенерированный секрет; не записывайте его в логи.
 print(created.data.user.username)
 
-updated = await client.users.update(
+await client.users.update(
     "alice",
     PatchUserRequest(max_tcp_conns=20, expiration_rfc3339="2027-01-01T00:00:00Z"),
     revision=created.revision,
 )
-
-rotated = await client.users.rotate_secret("alice", RotateSecretRequest())
+await client.users.rotate_secret("alice", RotateSecretRequest())
 await client.users.reset_quota("alice")
 await client.users.disable("alice")
 await client.users.enable("alice")
@@ -190,6 +201,12 @@ await client.users.enable("alice")
 сброса квоты доступны `daily`, `weekly` и `monthly`; при создании пользователя требуется
 положительное значение `data_quota_bytes`.
 
+Поле `source_deny` принимает список CIDR-префиксов IPv4 или IPv6 (`"203.0.113.0/24"`).
+Список запрещает пользователю исходящие подключения из указанных сетей; после изменения
+политики списков требуется перезагрузка поколения runtime, о чём сообщает
+`UserInfo.source_deny_status.runtime_reload_required`. При создании явно переданный
+`source_deny=None` сериализуется как JSON `null`, а пропущенное поле не отправляется вовсе.
+
 ### Семантика PATCH
 
 Пропущенное поле, `None` и ноль имеют разное значение:
@@ -201,6 +218,8 @@ await client.users.enable("alice")
 | `PatchUserRequest(max_tcp_conns=0)` | Передать явный ноль; его смысл для этой настройки определяет Telemt. |
 | `PatchUserRequest(enabled=False)` | Отключить пользователя. |
 | `PatchUserRequest(secret=None)` | Оставить секрет без изменений, как это делает Telemt. |
+| `PatchUserRequest(source_deny=["203.0.113.0/24"])` | Заменить список запрещённых сетей. |
+| `PatchUserRequest(source_deny=None)` | Очистить список запрещённых сетей. |
 
 Для генерации нового секрета используйте `rotate_secret()`. Модели запросов отклоняют
 неизвестные поля и недопустимые значения. Проверки, зависящие от состояния сервера,
@@ -234,6 +253,12 @@ for quota in quotas.data.users:
 | `status_code` | `int` | Фактический HTTP-статус ответа. |
 | `ok` | `Literal[True]` | Успешно разобранный ответ API. |
 
+Все методы, кроме `config.state()`, возвращают `APIResponse[T]` с обязательной
+ревизией. `config.state()` возвращает `NullableRevisionAPIResponse[ConfigStateData]`,
+у которого `revision` имеет тип `str | None`: сервер опускает ревизию, когда желаемая
+конфигурация ещё не зафиксирована, поэтому проверяйте поле на `None`, прежде чем
+использовать его в `If-Match`.
+
 Вложенные данные тоже представлены моделями: `user.links.tls_domains[0].domain`
 и `status.runtime.manager.issuance_enabled` доступны проверке типов после проверки
 nullable-полей на `None`. Модели импортируются из `telemt.models`.
@@ -252,12 +277,21 @@ await client.users.update(
 прежде чем повторять запрос. Клиент не хранит общую ревизию и не подставляет её автоматически,
 поэтому параллельные ответы независимы. WEB-операции используют `runtime_instance`.
 
+Мутации конфигурации и политики доступа дополнительно принимают `runtime_match=` —
+непрозрачный токен публикации runtime из `config.state()` (`runtime.runtime_match`) или
+из `ConfigValidationData.runtime`, который передаётся в заголовок `If-Runtime-Match`.
+SDK проверяет токен до отправки: от 1 до 128 символов, только шестнадцатеричные цифры
+и двоеточия. Устаревший токен вызывает `ConflictError` (409 `runtime_conflict`) —
+сервер успел применить другую конфигурацию раньше вашей записи.
+
 Новые поля сервера сохраняются в `model_extra`. Для представления, совместимого с JSON,
 используйте `model_dump(mode="json", by_alias=True)`. Разделы конфигурации остаются
 `dict[str, JsonValue]`, поскольку это расширяемые конфигурационные данные;
 известные структуры телеметрии и WEB описаны отдельными моделями.
 
 ## Конфигурация и перезагрузка
+
+Измените раздел конфигурации и дождитесь завершения перезагрузки:
 
 ```python
 import asyncio
@@ -284,7 +318,11 @@ if changed.data.reload is not None:
 ```
 
 Для изменения доступны `general`, `timeouts`, `censorship`, `upstreams`, `dc_overrides`,
-`web` и `server.listeners`. Проверка на стороне сервера определяет, какие вложенные
+`web`, `server.listeners`, пять наблюдаемых настроек `server.api`
+(`minimal_runtime_enabled`, `minimal_runtime_cache_ttl_ms`, `runtime_edge_enabled`,
+`runtime_edge_cache_ttl_ms`, `runtime_edge_top_n`) и `network.dns_overrides`
+(пустой список очищает переопределения DNS). Другие ключи `server` и `network`
+отклоняются моделью запроса. Проверка на стороне сервера определяет, какие вложенные
 параметры можно изменить и каким требуется перезапуск процесса.
 
 HTTP `202` означает принятие операции, а не её завершение. Опрашивайте
@@ -294,7 +332,83 @@ HTTP `202` означает принятие операции, а не её за
 `system.reload(ReloadRequest(...))`. Режим `drain` требует `timeout_secs` от 1 до 3600;
 режим `instant` не принимает этот параметр.
 
+Изменения применяются сервером асинхронно: watcher публикует новую конфигурацию,
+а перезагрузка поколения runtime распространяет её на работающие обработчики. Флаги
+`restart_required`, `runtime_reload_required` и `process_restart_required` в ответе
+`config.update()` и в `ConfigValidationData.apply` показывают, какие границы должна
+пересечь правка. Не прерывайте процесс, пока флаги не сброшены и `config.state()`
+не сообщит `comparison.status == "published_match"`.
+
+### Схема, состояние и предварительная проверка конфигурации
+
+Получите схему полей, сравните состояние конфигурации и проверьте правку перед сохранением:
+
+```python
+schema = await client.config.schema()
+print(schema.data.schema_version, len(schema.data.fields))
+
+state = await client.config.state()  # или client.config.state(["network", "access"])
+print(state.revision, state.data.desired_status, state.data.comparison.status)
+
+if state.revision is None:
+    raise RuntimeError("ревизия конфигурации ещё не зафиксирована")
+report = await client.config.validate(
+    PatchConfigRequest(network={"dns_overrides": ["1.1.1.1"]}),
+    revision=state.revision,
+)
+print(report.data.valid, report.data.changed_paths, report.data.touched_sections)
+```
+
+`config.schema()` возвращает метаданные полей конфигурации: пути, значения по умолчанию,
+ограничения, политику применения (watcher, reload, эффект) и связанные API-маршруты.
+
+`config.state()` сравнивает желаемую и эффективную конфигурацию: проекции полей,
+отличия watcher, перезагрузки и runtime. Параметр `sections` фильтрует разделы; он
+принимает непустую последовательность уникальных имён из `general`, `network`,
+`server`, `timeouts`, `censorship`, `upstreams`, `dc_overrides`, `web`, `access`,
+`logging` и `root`. Только `sections=None` полностью опускает параметр запроса; пустая
+последовательность, дубликаты и неизвестные имена отклоняются `ValueError` до отправки.
+
+`config.validate()` выполняет предварительную проверку правки без её сохранения:
+ничего не фиксируется и не резервируется, проверку можно повторять свободно. Результат
+содержит `valid`, `base_revision`, `candidate_revision`, `changed_paths`,
+`normalization_effects`, `touched_sections` и `apply` с флагами перезагрузки. При
+отклонении сервер возвращает структурированные детали ошибки (см.
+[Обработку ошибок](#обработка-ошибок)).
+
+### Политика доступа
+
+Прочитайте текущую политику и примените ограничения с контролем ревизии и токена runtime:
+
+```python
+from telemt.models import AccessPolicyPatch, CidrRateLimitInput
+
+policy = await client.access.get()
+print(policy.data.desired, policy.data.published_match)
+
+updated = await client.access.update(
+    AccessPolicyPatch(
+        user_max_tcp_conns_global_each=64,
+        cidr_rate_limits={"203.0.113.0/24": CidrRateLimitInput(up_bps=10_000_000)},
+    ),
+    revision=policy.revision,
+    runtime_match=policy.data.runtime.runtime_match,
+)
+print(updated.data.changed_paths)
+```
+
+`AccessPolicyPatch` — разреженный JSON Merge Patch из пяти политик: пропущенные поля
+не меняются, явный `None` у скаляра восстанавливает значение по умолчанию, явный `None`
+у записи `cidr_rate_limits` удаляет правило для этой сети, а `None` вместо всей карты
+очищает все правила. Полностью пустая правка отклоняется. Ключи `cidr_rate_limits`
+принимают CIDR-префиксы и шаблоны `*4/N`, `*6/N`, `*/N`; каждое значение требует
+хотя бы одного положительного направления (`up_bps` или `down_bps` до 100 Гбит/с,
+ноль означает «без ограничения»). Ответ содержит желаемый и эффективный снимки,
+статус публикации и `changed_paths` (только у PATCH).
+
 ## WEB-сессии и жизненный цикл
+
+Найдите сессии пользователя и завершите их, дождавшись результата операции:
 
 ```python
 from telemt.models import CloseRequest, RefsSelector, SessionQuery
@@ -336,9 +450,12 @@ async for session in client.runtime.web.iter_sessions(SessionQuery(user="alice",
 
 Ссылки на сессии и операции действуют в пределах текущего процесса сервера.
 Опрашивайте возвращённый идентификатор операции, чтобы узнать результат:
-принятие запроса само по себе не означает завершения.
+принятие запроса само по себе не означает завершения. `wait_operation()` считает
+терминальными состояния `completed`, `failed` и `cancelled`.
 
 ## Обработка ошибок
+
+Обрабатывайте конфликт ревизий отдельно от ошибок API и транспорта:
 
 ```python
 from telemt import APIError, ConflictError, TransportError
@@ -360,15 +477,22 @@ except TransportError:
 | `AuthenticationError` | HTTP 401. |
 | `PermissionDeniedError` | HTTP 403, включая режим read-only. |
 | `NotFoundError` | HTTP 404. |
-| `ConflictError` | HTTP 409, включая конфликт ревизий. |
-| `APIError` | Другие ошибки сервера; доступны `status_code`, `code`, `message`, `request_id`. |
+| `ConflictError` | HTTP 409, включая конфликт ревизий и устаревший токен runtime. |
+| `APIError` | Другие ошибки сервера; доступны `status_code`, `code`, `message`, `request_id` и `details`. |
 | `RequestTimeoutError` | Тайм-аут HTTPX; наследуется от `TransportError`. |
 | `TransportError` | Ошибка сети или транспорта; исходное исключение доступно в `__cause__`. |
 | `InvalidResponseError` | Некорректный JSON, формат ответа или структура данных. |
 
-Все исключения SDK наследуются от `TelemtError`. Ошибки моделей запросов вызывают
-`pydantic.ValidationError`; недопустимые аргументы маршрутов — `ValueError`, включая
-его подкласс `ValidationError`. Отмена асинхронной задачи распространяется без обёртки.
+Все исключения SDK наследуются от `TelemtError`. Модели запросов отклоняют недопустимые
+поля с `pydantic.ValidationError`; проверки аргументов маршрутов в SDK (`base_url`,
+`username`, `sections`, `runtime_match`) вызывают `ValueError`. `pydantic.ValidationError`
+— подкласс `ValueError`, поэтому `except ValueError` перехватывает оба случая. Отмена
+асинхронной задачи распространяется без обёртки.
+
+Сервер может добавлять к отклонённому запросу структурированные детали: `APIError.details`
+содержит кортеж объектов `FieldIssue` с полями `path`, `code` и `message` (например,
+`code="unknown_field"` с путём неизвестного поля у предварительной проверки конфигурации).
+Кортеж пуст, когда сервер детали не предоставил.
 
 Два HTTP-статуса могут содержать штатный результат: `health.ready()` возвращает данные
 готовности при HTTP 503, а `runtime.web.session()` — `GoneSessionData` при HTTP 410.
@@ -379,7 +503,10 @@ except TransportError:
 
 SDK следует [проекту Telemt](https://github.com/telemt/telemt) и его
 [Control API](https://github.com/telemt/telemt/blob/main/docs/Architecture/API/API.md).
-Клиент охватывает 48 основных операций Control API. HTML-страница `/web-status`
+Клиент охватывает все 54 операции Control API Telemt **3.5.17** (проверен против
+тега `3.5.17`, коммит
+[`66708d2866f3f3a4541c4fa67984d408e71a8af4`](https://github.com/telemt/telemt/tree/66708d2866f3f3a4541c4fa67984d408e71a8af4)),
+и рассчитан на Telemt 3.5.17 и совместимые выпуски 3.5.x. HTML-страница `/web-status`
 и транспортные WEB-эндпоинты находятся за пределами этого API-клиента.
 
 Поддерживаются Python 3.13, 3.14 и 3.15 под Linux и Windows. Необязательные

@@ -9,4 +9,4 @@ __pycache__/
 htmlcov/
 dist/
 *.egg-info/
-/docs
+/docs/superpowers

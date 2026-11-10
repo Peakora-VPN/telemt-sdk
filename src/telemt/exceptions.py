@@ -1,5 +1,9 @@
 """Errors exposed by the SDK; cancellation is deliberately never intercepted."""
 
+from collections.abc import Iterable
+
+from .models.base import FieldIssue
+
 
 class TelemtError(Exception):
     """Base class for SDK failures."""
@@ -25,12 +29,19 @@ class APIError(TelemtError):
     """A rejected API request, retaining its machine code and audit request ID."""
 
     def __init__(
-        self, *, status_code: int, code: str, message: str, request_id: int | None = None
+        self,
+        *,
+        status_code: int,
+        code: str,
+        message: str,
+        request_id: int | None = None,
+        details: Iterable[FieldIssue] = (),
     ) -> None:
         self.status_code = status_code
         self.code = code
         self.message = message
         self.request_id = request_id
+        self.details: tuple[FieldIssue, ...] = tuple(details)
         super().__init__(f"HTTP {status_code} [{code}]: {message}")
 
 

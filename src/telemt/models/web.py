@@ -1,4 +1,4 @@
-"""Complete WEB control-plane response models for Telemt 3.5.16 (84e5b827)."""
+"""Complete WEB control-plane response models for Telemt 3.5.17 (66708d28)."""
 
 from .base import ResponseModel
 

@@ -3,7 +3,13 @@
 All resource methods are asynchronous. Each returns `APIResponse[T]`; the tables name `T`.
 Paths below are relative to `/v1`. Import request and response models from `telemt.models`.
 
-See the [README](../README.md) for authentication, lifecycle, revisions and error handling.
+The client covers all 54 Control API operations of Telemt 3.5.17 (source tag `3.5.17`,
+commit [`66708d2866f3`](https://github.com/telemt/telemt/commit/66708d2866f3f3a4541c4fa67984d408e71a8af4)).
+`config.state()` returns the nullable-revision envelope described under
+[Response behavior](#response-behavior).
+
+See the [README](../README.md) for authentication, lifecycle, revisions and error handling;
+[README.en.md](../README.en.md) is the English version.
 
 ## `client.health`
 
@@ -14,6 +20,9 @@ See the [README](../README.md) for authentication, lifecycle, revisions and erro
 
 ## `client.system`
 
+System endpoints reload configuration and report reload progress and server info.
+`reload_status()` and `wait_reload()` take `reload_id` as an unsigned 64-bit integer.
+
 | Method | HTTP route | Response data |
 | --- | --- | --- |
 | `reload(request=None, *, revision=None)` | `POST system/reload` | `ReloadAccepted` |
@@ -21,6 +30,8 @@ See the [README](../README.md) for authentication, lifecycle, revisions and erro
 | `info()` | `GET system/info` | `SystemInfoData` |
 
 ## `client.users`
+
+User endpoints manage accounts, credentials, quotas and enablement.
 
 | Method | HTTP route | Response data |
 | --- | --- | --- |
@@ -38,8 +49,49 @@ See the [README](../README.md) for authentication, lifecycle, revisions and erro
 
 | Method | HTTP route | Response data |
 | --- | --- | --- |
-| `update(patch, *, revision=None, reload=None)` | `PATCH config` | `PatchConfigResponse` |
+| `update(patch, *, revision=None, runtime_match=None, reload=None)` | `PATCH config` | `PatchConfigResponse` |
 | `get()` | `GET config` | `ConfigData` |
+| `schema()` | `GET config/schema` | `ConfigSchemaData` |
+| `state(sections=None)` | `GET config/state` | `ConfigStateData` (nullable revision) |
+| `validate(patch, *, revision=None, runtime_match=None, reload=None)` | `POST config/validate` | `ConfigValidationData` |
+
+`state(sections=None)` takes `sections` as a non-empty sequence of unique names from
+`general`, `network`, `server`, `timeouts`, `censorship`, `upstreams`, `dc_overrides`, `web`,
+`access`, `logging` and `root`, sent as one comma-separated query value. Pass a sequence,
+not a bare string: `str` input raises `ValueError`. Only `None` omits the query; empty
+sequences, duplicates and unknown names also raise `ValueError`.
+
+`validate()` preflights a patch without persisting or reserving anything: the result
+carries `valid`, `base_revision`, `candidate_revision`, `changed_paths`,
+`normalization_effects`, `touched_sections`, `warnings` and `apply`. `apply` is an
+`ApplyImpact` that sorts the changed paths by boundary: `watcher_paths` (the file
+watcher can apply them), `generation_paths` (they need generation activation) and
+`process_restart_paths` (they wait for a process restart), with the flags
+`restart_required`, `runtime_reload_required` and `process_restart_required`;
+`deferred_process_fields` lists process-owned fields retained by the active process.
+A rejected candidate raises `APIError` whose `details` list the offending paths.
+
+## `client.discovery`
+
+| Method | HTTP route | Response data |
+| --- | --- | --- |
+| `capabilities()` | `GET capabilities` | `CapabilitiesData` |
+
+`CapabilitiesData` exposes the implemented operation catalog (`OperationCapability`
+rows with gate, availability and mutation policy), `api_version`, `schema_version`,
+`software_version` and `read_only`. Operation catalogs remain server-provided data;
+the SDK does not model them as constants.
+
+## `client.access`
+
+| Method | HTTP route | Response data |
+| --- | --- | --- |
+| `get()` | `GET access/policy` | `AccessPolicyData` |
+| `update(patch, *, revision=None, runtime_match=None)` | `PATCH access/policy` | `AccessPolicyData` |
+
+Both methods return desired/effective policy snapshots, the runtime baseline
+(`runtime.runtime_match` feeds `If-Runtime-Match`), publication status and
+`changed_paths` (PATCH only; GET omits the field).
 
 ## `client.limits`
 
@@ -56,6 +108,8 @@ See the [README](../README.md) for authentication, lifecycle, revisions and erro
 
 ## `client.stats`
 
+Stats endpoints report traffic, upstream, data-center and per-user statistics.
+
 | Method | HTTP route | Response data |
 | --- | --- | --- |
 | `summary()` | `GET stats/summary` | `SummaryData` |
@@ -69,6 +123,10 @@ See the [README](../README.md) for authentication, lifecycle, revisions and erro
 | `quota()` | `GET stats/users/quota` | `UserQuotaData` |
 
 ## `client.runtime`
+
+Runtime endpoints report edge events, TLS fingerprints, gates and runtime quality.
+`events_recent()` and `tls_fingerprints()` accept an optional `limit` from 1 to 1000;
+`None` omits the parameter.
 
 | Method | HTTP route | Response data |
 | --- | --- | --- |
@@ -84,6 +142,8 @@ See the [README](../README.md) for authentication, lifecycle, revisions and erro
 | `connections_summary()` | `GET runtime/connections/summary` | `RuntimeEdgeConnectionsSummaryData` |
 
 ## `client.runtime.web`
+
+WEB endpoints inspect and control sessions, close operations and the operator lifecycle.
 
 | Method | HTTP route | Response data |
 | --- | --- | --- |
@@ -105,7 +165,9 @@ See the [README](../README.md) for authentication, lifecycle, revisions and erro
 | `CreateUserRequest` | Required `username`; optional `secret` and user settings below. Omitted secret is generated by Telemt. |
 | `PatchUserRequest` | Optional `secret` and user settings. Omitted fields remain unchanged; `None` clears overrides, except `secret=None` which is a no-op. |
 | `RotateSecretRequest` | Optional `secret`; omit to generate a new one. |
-| `PatchConfigRequest` | At least one of `general`, `timeouts`, `censorship`, `upstreams`, `dc_overrides`, `web`, `server`. Only `server.listeners` is editable in `server`. |
+| `PatchConfigRequest` | At least one of `general`, `timeouts`, `censorship`, `upstreams`, `dc_overrides`, `web`, `server`, `network`. In `server` only `listeners` and `api` are editable, and `api` only accepts the five observability keys. In `network` only `dns_overrides` is editable (`[]` clears). |
+| `AccessPolicyPatch` | Sparse merge patch over `user_max_tcp_conns_global_each`, `user_max_unique_ips_global_each`, `user_max_unique_ips_mode`, `user_max_unique_ips_window_secs` and `cidr_rate_limits`. Omitted fields stay unchanged; explicit scalar `None` restores the default; a `None` map entry deletes that rule; `None` for the map clears all rules. An empty patch is rejected, including a patch whose only set field is an empty `cidr_rate_limits` map. |
+| `CidrRateLimitInput` | `up_bps` / `down_bps` from 0 to 100 Gbit/s; at least one direction must be positive (0 means unlimited). |
 | `ReloadRequest` | `mode="instant"` or `"drain"`; `timeout_secs` required only for drain (1-3600); `failure_policy="keep_new"` or `"rollback"`. |
 | `SessionQuery` | Session filters, optional `limit` (1-200) and `cursor`. An exact `session_ref` cannot be combined with pagination. |
 | `RuntimeInstanceRequest` | Required `runtime_instance` from the current WEB status. |
@@ -125,10 +187,13 @@ User settings shared by creation and updates:
 | `rate_limit_down_bps` | `int \| None` | Download rate in bits per second. |
 | `max_unique_ips` | `int \| None` | Per-user unique-IP override. |
 | `enabled` | `bool \| None` | User enabled override. |
+| `source_deny` | `list[str] \| None` | IPv4/IPv6 CIDR prefixes denied for this user's outbound connections. |
 
 Integer limits are unsigned 64-bit values. Zero is sent as zero, not omitted; its meaning
-is determined by Telemt for each setting. `None` values on creation are omitted. On PATCH,
-explicit `None` values are sent as JSON `null`.
+is determined by Telemt for each setting. Sparse models (`CreateUserRequest`,
+`PatchUserRequest`, `PatchConfigRequest`, `AccessPolicyPatch`) send an explicitly set
+`None` as JSON `null` on both creation and PATCH, while omitted fields stay absent;
+other request models omit `None` fields.
 
 ## WEB filters and selectors
 
@@ -145,11 +210,16 @@ explicit `None` values are sent as JSON `null`.
 
 `RefsSelector(session_refs=[...])` accepts 1-200 unique references.
 `FilterSelector(...)` requires at least one filter. `AllSelector()` requires the server's
-manager issuance to be disabled. All references in a close request must belong to its
-`runtime_instance`. Operation IDs use the `wo1` prefix and are also process-scoped.
+manager issuance to be disabled: narrow `status.data.runtime` and its `manager` for
+`None`, then read `manager.issuance_enabled`. All references in a close request must
+belong to its `runtime_instance`. Operation IDs use the `wo1` prefix with the same
+`<32 lowercase hex runtime instance>.<16 lowercase hex nonzero ID>` shape as
+`session_ref`; an operation ID belongs to the runtime instance that created it, and a
+reference from another instance fails with `409 web_runtime_mismatch`.
 
 WEB operator drain IDs belong to `OperatorLifecycleStatus.drain`; observe them through
-`runtime.web.status()`. `runtime.web.operation()` polls close-session operations.
+`runtime.web.status()`. `runtime.web.operation()` reads the current status of a
+close-session operation in a single request.
 
 ## Response behavior
 
@@ -160,21 +230,35 @@ WEB operator drain IDs belong to `OperatorLifecycleStatus.drain`; observe them t
 - Configuration sections use `dict[str, JsonValue]` and remain extensible.
 - Server enum values in responses are strings to tolerate new variants. Request choices
   use `Literal` types and are validated before sending.
+- Error envelopes nest structured `details` (each with `path`, `code`, `message`) inside
+  `error`; `APIError.details` exposes them as a tuple of `FieldIssue`. The tuple is empty
+  when the server omits details.
+- `runtime_match` values are validated before transport: 1–128 characters, hexadecimal
+  digits and colons only, sent as `If-Runtime-Match`. `revision` is sent as `If-Match`.
+- `config.state()` is the one method returning
+  `NullableRevisionAPIResponse[ConfigStateData]`: the server omits `revision` until the
+  desired configuration is committed, so `revision` is `str | None`. Every other method
+  returns `APIResponse[T]` with `revision: str`.
 - `health.ready()` can return valid readiness data with HTTP 503.
 - `runtime.web.session()` returns `SessionRow` for a live session and `GoneSessionData`
   with HTTP 410 for a retained closed-session record.
 
 Model definitions, including all nested fields, are in
+[`base.py`](../src/telemt/models/base.py),
+[`requests.py`](../src/telemt/models/requests.py),
 [`responses.py`](../src/telemt/models/responses.py),
-[`web.py`](../src/telemt/models/web.py) and
-[`operations.py`](../src/telemt/models/operations.py).
+[`web.py`](../src/telemt/models/web.py),
+[`operations.py`](../src/telemt/models/operations.py),
+[`discovery.py`](../src/telemt/models/discovery.py),
+[`config.py`](../src/telemt/models/config.py) and
+[`access.py`](../src/telemt/models/access.py).
 
 ## Iteration and waiting
 
 - `system.wait_reload(reload_id, *, timeout=60, poll_interval=1)` returns
   `APIResponse[ReloadStatus]` on `succeeded`, `rolled_back` or `failed`.
 - `runtime.web.wait_operation(operation_id, *, timeout=60, poll_interval=1)` returns
-  `APIResponse[ControlOperationStatus]` on `completed` or `failed`.
+  `APIResponse[ControlOperationStatus]` on `completed`, `failed` or `cancelled`.
 - `runtime.web.iter_sessions(query=None)` yields `SessionRow` across pages, preserving
   filters and leaving the supplied query unchanged. Use `sessions()` when you need
   snapshot metadata such as `partial` and `scan_truncated`. A repeated cursor raises

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import math
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from typing import TYPE_CHECKING
 
 from pydantic import TypeAdapter
@@ -17,6 +17,22 @@ if TYPE_CHECKING:
 _USERNAME = TypeAdapter(m.Username)
 _SESSION_REF = TypeAdapter(m.SessionRef)
 _OPERATION_REF = TypeAdapter(m.OperationRef)
+
+_STATE_SECTIONS = frozenset(
+    {
+        "general",
+        "network",
+        "server",
+        "timeouts",
+        "censorship",
+        "upstreams",
+        "dc_overrides",
+        "web",
+        "access",
+        "logging",
+        "root",
+    }
+)
 
 
 def _username(value: str) -> str:
@@ -176,25 +192,101 @@ class ConfigResource(Resource):
         patch: m.PatchConfigRequest,
         *,
         revision: str | None = None,
+        runtime_match: str | None = None,
         reload: m.ReloadRequest | None = None,
     ) -> m.APIResponse[m.PatchConfigResponse]:
-        params = None
-        if reload is not None:
-            reload = m.ReloadRequest.model_validate(reload)
-            params = reload.model_dump(exclude_none=True)
-            params["reload"] = params.pop("mode")
         return await self._client._request(
             "PATCH",
             "config",
             m.APIResponse[m.PatchConfigResponse],
             body=patch,
-            params=params,
+            params=_reload_params(reload),
             revision=revision,
+            runtime_match=runtime_match,
         )
 
     async def get(self) -> m.APIResponse[m.ConfigData]:
         """GET /v1/config."""
         return await self._client._request("GET", "config", m.APIResponse[m.ConfigData])
+
+    async def schema(self) -> m.APIResponse[m.ConfigSchemaData]:
+        """GET /v1/config/schema."""
+        return await self._client._request(
+            "GET", "config/schema", m.APIResponse[m.ConfigSchemaData]
+        )
+
+    async def state(
+        self, sections: Sequence[str] | None = None
+    ) -> m.NullableRevisionAPIResponse[m.ConfigStateData]:
+        """GET /v1/config/state; sections=None omits the query entirely.
+
+        An empty selection is rejected, as are duplicate or unknown section
+        names; the server never receives an empty ``sections`` value.
+        """
+        params = None
+        if sections is not None:
+            if isinstance(sections, str) or not sections:
+                raise ValueError("sections must be a non-empty sequence of section names")
+            names = list(sections)
+            unknown = [name for name in names if name not in _STATE_SECTIONS]
+            if unknown:
+                raise ValueError(f"unknown config state sections: {unknown!r}")
+            if len(set(names)) != len(names):
+                raise ValueError("sections must not contain duplicate names")
+            params = {"sections": ",".join(names)}
+        return await self._client._request(
+            "GET", "config/state", m.NullableRevisionAPIResponse[m.ConfigStateData], params=params
+        )
+
+    async def validate(
+        self,
+        patch: m.PatchConfigRequest,
+        *,
+        revision: str | None = None,
+        runtime_match: str | None = None,
+        reload: m.ReloadRequest | None = None,
+    ) -> m.APIResponse[m.ConfigValidationData]:
+        """POST /v1/config/validate; preflights a patch without persisting it."""
+        return await self._client._request(
+            "POST",
+            "config/validate",
+            m.APIResponse[m.ConfigValidationData],
+            body=patch,
+            params=_reload_params(reload),
+            revision=revision,
+            runtime_match=runtime_match,
+        )
+
+
+class DiscoveryResource(Resource):
+    async def capabilities(self) -> m.APIResponse[m.CapabilitiesData]:
+        """GET /v1/capabilities."""
+        return await self._client._request("GET", "capabilities", m.APIResponse[m.CapabilitiesData])
+
+
+class AccessResource(Resource):
+    async def get(self) -> m.APIResponse[m.AccessPolicyData]:
+        """GET /v1/access/policy."""
+        return await self._client._request(
+            "GET", "access/policy", m.APIResponse[m.AccessPolicyData]
+        )
+
+    async def update(
+        self,
+        patch: m.AccessPolicyPatch,
+        *,
+        revision: str | None = None,
+        runtime_match: str | None = None,
+    ) -> m.APIResponse[m.AccessPolicyData]:
+        """PATCH /v1/access/policy; sparse nulls reset defaults or delete CIDR rules."""
+        return await self._client._request(
+            "PATCH",
+            "access/policy",
+            m.APIResponse[m.AccessPolicyData],
+            body=patch,
+            revision=revision,
+            runtime_match=runtime_match,
+        )
 
 
 class LimitsResource(Resource):
@@ -400,12 +492,12 @@ class WebResource(Resource):
         timeout: float = 60,  # noqa: ASYNC109
         poll_interval: float = 1,
     ) -> m.APIResponse[m.ControlOperationStatus]:
-        """Wait for completed or failed; cancellation and API errors propagate."""
+        """Wait for a terminal state: completed, failed, or cancelled."""
         _poll_limits(timeout, poll_interval)
         async with asyncio.timeout(timeout):
             while True:
                 result = await self.operation(operation_id)
-                if result.data.state in {"completed", "failed"}:
+                if result.data.state in {"completed", "failed", "cancelled"}:
                     return result
                 await asyncio.sleep(poll_interval)
 
@@ -467,6 +559,15 @@ def _limit(value: int | None) -> dict[str, int] | None:
     if type(value) is not int or not 1 <= value <= 1000:
         raise ValueError("limit must be an integer between 1 and 1000")
     return {"limit": value}
+
+
+def _reload_params(reload: m.ReloadRequest | None) -> dict[str, str | int] | None:
+    if reload is None:
+        return None
+    reload = m.ReloadRequest.model_validate(reload)
+    params = reload.model_dump(exclude_none=True)
+    params["reload"] = params.pop("mode")
+    return params
 
 
 def _poll_limits(timeout: float, poll_interval: float) -> None:
