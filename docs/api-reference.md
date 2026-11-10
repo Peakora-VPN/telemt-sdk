@@ -171,8 +171,10 @@ User settings shared by creation and updates:
 | `source_deny` | `list[str] \| None` | IPv4/IPv6 CIDR prefixes denied for this user's outbound connections. |
 
 Integer limits are unsigned 64-bit values. Zero is sent as zero, not omitted; its meaning
-is determined by Telemt for each setting. `None` values on creation are omitted. On PATCH,
-explicit `None` values are sent as JSON `null`.
+is determined by Telemt for each setting. Sparse models (`CreateUserRequest`,
+`PatchUserRequest`, `PatchConfigRequest`, `AccessPolicyPatch`) send an explicitly set
+`None` as JSON `null` on both creation and PATCH, while omitted fields stay absent;
+other request models omit `None` fields.
 
 ## WEB filters and selectors
 
