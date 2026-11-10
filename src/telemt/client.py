@@ -201,7 +201,7 @@ class TelemtClient:
                 code=error.error.code,
                 message=error.error.message,
                 request_id=error.request_id,
-                details=error.details,
+                details=error.error.details,
             )
         if response.status_code not in accepted_statuses:
             raise APIError(

@@ -3,14 +3,14 @@
 The default `uv run pytest` command needs no server or network access. It includes:
 
 - MockTransport tests for requests, authentication, errors, timeouts and client ownership.
-- Replay of real successful responses for all 48 SDK operations, including live and gone
+- Replay of real successful responses for all 54 SDK operations, including live and gone
   WEB sessions and asynchronous operation states.
 - Field names, nested types and omitted-field checks against a source-derived inventory.
 - Request boundary cases and regression tests for behavior not fully described by API docs.
 
 The source inventory and recorded responses in `tests/fixtures` were checked against
-Telemt **3.5.16**, commit
-[`84e5b827a6619fb2e09ad3d09f253cdffe04bc2f`](https://github.com/telemt/telemt/tree/84e5b827a6619fb2e09ad3d09f253cdffe04bc2f).
+Telemt **3.5.17**, commit
+[`66708d2866f3f3a4541c4fa67984d408e71a8af4`](https://github.com/telemt/telemt/tree/66708d2866f3f3a4541c4fa67984d408e71a8af4).
 
 `source-contracts.json` records serialized model shapes and fields, including
 flattened Rust structs, serde aliases, nullable fields and `skip_serializing_if` behavior.
@@ -23,6 +23,11 @@ these fixtures belong only to disposable test users. No production credentials a
 Run it only against a disposable instance using `tests/integration/telemt.toml`.
 It checks the expected initial test user before making changes. Do not point it at a
 production server. The test is skipped unless both test URL environment variables are set.
+The scenario also covers discovery capabilities, the configuration schema, full and
+section-filtered config state, preflight validation with structured invalid-field
+details, source and runtime preconditions, access-policy update/restore, user
+`source_deny` create/patch/null with generation reloads, `network.dns_overrides`
+update/clear, and API observability editing with reload.
 
 The following Bash commands start an isolated Linux x86-64 Telemt binary with Docker.
 They use temporary files and randomly assigned localhost ports. Docker and `curl` must
@@ -34,9 +39,9 @@ audit_dir=$(mktemp -d)
 audit_container="telemt-sdk-test-$(date +%s)-$$"
 trap 'docker rm -f "$audit_container" >/dev/null 2>&1 || true' EXIT
 
-curl -fL https://github.com/telemt/telemt/releases/download/3.5.16/telemt-x86_64-linux-musl.tar.gz \
+curl -fL https://github.com/telemt/telemt/releases/download/3.5.17/telemt-x86_64-linux-musl.tar.gz \
   -o "$audit_dir/telemt.tar.gz"
-echo "05d7c32eff5990285657408cf383614d845ecc06aac0d5adc02a86d72c907146  $audit_dir/telemt.tar.gz" \
+echo "f1591635849e0aad31f147692b21726da2f49499aae3ece79f8760c92925133a  $audit_dir/telemt.tar.gz" \
   | sha256sum --check
 tar -xzf "$audit_dir/telemt.tar.gz" -C "$audit_dir"
 chmod +x "$audit_dir/telemt"

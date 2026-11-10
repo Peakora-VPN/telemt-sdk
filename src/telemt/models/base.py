@@ -57,10 +57,10 @@ class FieldIssue(BaseModel):
 class ErrorDetail(ResponseModel):
     code: str
     message: str
+    details: list[FieldIssue] = Field(default_factory=list)
 
 
 class ErrorEnvelope(ResponseModel):
     ok: Literal[False]
     error: ErrorDetail
-    details: list[FieldIssue] = Field(default_factory=list)
     request_id: int

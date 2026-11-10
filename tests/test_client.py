@@ -282,11 +282,18 @@ async def test_error_details_propagate_to_api_error(mock_api):
             400,
             json={
                 "ok": False,
-                "error": {"code": "invalid_fields", "message": "Rejected"},
-                "details": [
-                    {"path": "network.dns_overrides", "code": "invalid_entry", "message": "bad"},
-                    {"path": "web.enabled", "code": "read_only", "message": "locked"},
-                ],
+                "error": {
+                    "code": "invalid_fields",
+                    "message": "Rejected",
+                    "details": [
+                        {
+                            "path": "network.dns_overrides",
+                            "code": "invalid_entry",
+                            "message": "bad",
+                        },
+                        {"path": "web.enabled", "code": "read_only", "message": "locked"},
+                    ],
+                },
                 "request_id": 11,
             },
         )
