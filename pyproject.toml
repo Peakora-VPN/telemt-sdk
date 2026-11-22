@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.27", "hatch-vcs>=0.5"]
+requires = ["hatchling>=1.33.0", "hatch-vcs>=0.5.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -29,11 +29,11 @@ Documentation = "https://github.com/Peakora-VPN/telemt-sdk#readme"
 
 [dependency-groups]
 dev = [
-    "mypy>=1.19",
-    "pytest>=8.4",
-    "pytest-asyncio>=1.2",
-    "pytest-cov>=7",
-    "ruff>=0.14.4",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.6",
 ]
 
 [tool.hatch.version]
